@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1006819305329",
+    "project_id": "vuna-gigs-2d758",
+    "storage_bucket": "vuna-gigs-2d758.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1006819305329:android:41f9e3254680175b9df8d0",
+        "android_client_info": {
+          "package_name": "com.example.vuna__gigs"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1006819305329-v9r1r9scsbnk56lamf4qbiu5lefb3d9v.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.vuna__gigs",
+            "certificate_hash": "ad0dd8527eeb3ec17089d97ce0894688fb505580"
+          }
+        },
+        {
+          "client_id": "1006819305329-eufugq32shv2mg1h1a51hcdpe6n24h2g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNInREayNCXYXaY5l1ddYGHoVhoFZTNRs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1006819305329-eufugq32shv2mg1h1a51hcdpe6n24h2g.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
