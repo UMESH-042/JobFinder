@@ -7,6 +7,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:vuna__gigs/view/add_jobs.dart';
 
 import '../screens/login_screen.dart';
 import 'ChatScreen.dart';
@@ -392,7 +393,7 @@ String? getCurrentUser() {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ChatScreen(currentUserEmail: widget.currentUserEmail,),
+                    builder: (context) =>AddJobs(),
                   ),
                 );
               },
