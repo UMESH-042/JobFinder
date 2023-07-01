@@ -112,7 +112,7 @@ String? getCurrentUser() {
     super.initState();
      String? currentUID = getCurrentUser();
     _screens = [
-      DisplayJobs(),
+      JobListPage(),
       ChatScreen(currentUserEmail: widget.currentUserEmail,),
       ProfileScreen(),
       SettingsScreen(),
