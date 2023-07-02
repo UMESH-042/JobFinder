@@ -393,7 +393,7 @@ String? getCurrentUser() {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>AddJobs(),
+                    builder: (context) =>AddJobs(otherUserEmail: widget.currentUserEmail,),
                   ),
                 );
               },

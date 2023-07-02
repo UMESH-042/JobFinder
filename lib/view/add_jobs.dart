@@ -8,7 +8,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 class AddJobs extends StatefulWidget {
-  const AddJobs({Key? key}) : super(key: key);
+  final String otherUserEmail;
+
+  const AddJobs({Key? key, required this.otherUserEmail}) : super(key: key);
 
   @override
   State<AddJobs> createState() => _AddJobsState();
@@ -19,6 +21,8 @@ class _AddJobsState extends State<AddJobs> {
   TextEditingController _salaryController = TextEditingController();
   TextEditingController _categoryController = TextEditingController();
   TextEditingController _subcategoryController = TextEditingController();
+  TextEditingController _descriptionController = TextEditingController();
+  TextEditingController _requirementsController = TextEditingController();
   String jobtype = "";
 
   List<String> availableJobTypes = [
@@ -134,14 +138,6 @@ class _AddJobsState extends State<AddJobs> {
                           ),
                         ],
                       ),
-                      // const SizedBox(
-                      //   height: 25,
-                      // ),
-                      // label("Sub Category"),
-                      // const SizedBox(
-                      //   height: 20,
-                      // ),
-                      // SubCategory(),
                       const SizedBox(
                         height: 30,
                       ),
@@ -158,6 +154,22 @@ class _AddJobsState extends State<AddJobs> {
                         height: 20,
                       ),
                       SubCategory(),
+                      const SizedBox(
+                        height: 30,
+                      ),
+                      label("Description"),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      Description(),
+                      const SizedBox(
+                        height: 30,
+                      ),
+                      label("Requirements"),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      requirements(),
                       const SizedBox(
                         height: 30,
                       ),
@@ -327,6 +339,55 @@ class _AddJobsState extends State<AddJobs> {
     );
   }
 
+  Widget Description() {
+    return Container(
+      height: 155,
+      width: MediaQuery.of(context).size.width,
+      decoration: BoxDecoration(
+        color: Color.fromARGB(255, 56, 47, 47),
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: TextFormField(
+        controller: _descriptionController,
+        maxLines: null,
+        style: const TextStyle(
+          color: Colors.white70,
+          fontSize: 17,
+        ),
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          hintText: "Description",
+          hintStyle: TextStyle(color: Colors.grey[500], fontSize: 17),
+          contentPadding: EdgeInsets.only(left: 20, right: 20),
+        ),
+      ),
+    ).py12();
+  }
+
+  Widget requirements() {
+    return Container(
+      height: 55,
+      width: MediaQuery.of(context).size.width,
+      decoration: BoxDecoration(
+        color: Color.fromARGB(255, 56, 47, 47),
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: TextFormField(
+        controller: _requirementsController,
+        style: const TextStyle(
+          color: Colors.white70,
+          fontSize: 17,
+        ),
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          hintText: "Requirements",
+          hintStyle: TextStyle(color: Colors.grey[500], fontSize: 17),
+          contentPadding: EdgeInsets.only(left: 20, right: 20),
+        ),
+      ),
+    );
+  }
+
   Widget label(String label) {
     return Text(label,
         style: TextStyle(
@@ -374,7 +435,7 @@ class _AddJobsState extends State<AddJobs> {
         if (_locationController.text.isNotEmpty &&
             _salaryController.text.isNotEmpty &&
             _categoryController.text.isNotEmpty &&
-            _subcategoryController.text.isNotEmpty &&
+            _subcategoryController.text.isNotEmpty && _descriptionController.text.isNotEmpty && _requirementsController.text.isNotEmpty &&
             jobtype.isNotEmpty &&
             imageXfile != null) {
           setState(() {
@@ -388,8 +449,11 @@ class _AddJobsState extends State<AddJobs> {
             "salary": _salaryController.text,
             "category": _categoryController.text,
             "subcategory": _subcategoryController.text,
+            "description":_descriptionController.text,
+            "requirements":_requirementsController.text,
             "jobtype": jobtype,
             "image": bookImageUrl,
+            "postedby":widget.otherUserEmail,
           }).then((value) {
             setState(() {
               _isAddingJob = false;
