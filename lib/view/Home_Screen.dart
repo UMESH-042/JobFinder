@@ -232,6 +232,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                       title: Text('Logout'),
                       onTap: () {
+                        Navigator.pop(context);
                         authProvider.logOut(context);
                         print('logout successful');
                       },
@@ -355,7 +356,7 @@ class AuthProvider with ChangeNotifier {
 
     try {
       await _auth.signOut().then((value) {
-        Navigator.push(
+        Navigator.pushReplacement(
             context, MaterialPageRoute(builder: (_) => LoginScreen()));
       });
     } catch (e) {

@@ -49,7 +49,7 @@ class LandingPage extends StatelessWidget {
 Widget customButton(BuildContext context, Size size) {
   return GestureDetector(
     onTap: () {
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => LoginScreen()),
       );

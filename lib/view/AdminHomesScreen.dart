@@ -98,7 +98,7 @@ class AuthProvider with ChangeNotifier {
 
     try {
       await _auth.signOut();
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => LoginScreen()),
       );

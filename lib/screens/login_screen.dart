@@ -94,7 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       // alignment: Alignment.centerRight,
                       alignment: Alignment.centerRight,
                       child: GestureDetector(
-                        onTap: () => Navigator.of(context).push(
+                        onTap: () => Navigator.of(context).pushReplacement(
                             MaterialPageRoute(builder: (_) => CreateAccount())),
                         child: Text(
                           "Forget Password?",
@@ -221,7 +221,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   // Navigate to AdminScreen
                   print('Login As Admin');
 
-                  Navigator.push(
+                  Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
                         builder: (_) => AdminHomeScreen(
@@ -231,7 +231,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 } else if (userType == 'user') {
                   // Navigate to HomeScreen
                   print('Login As User');
-                  Navigator.push(
+                  Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
                       builder: (_) => HomePage(

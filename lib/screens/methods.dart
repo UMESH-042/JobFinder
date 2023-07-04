@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -24,8 +23,8 @@ Future<User?> createAccount(String name, String email, String password) async {
         "name": name,
         "email": email,
         "status": "unavailable",
-        "uid":_auth.currentUser!.uid,
-        "admin":"user",
+        "uid": _auth.currentUser!.uid,
+        "admin": "user",
       });
       return user;
     } else {
@@ -102,20 +101,19 @@ Future<User?> Login(String email, String password) async {
 //   }
 // }
 
-
 Future logOut(BuildContext context) async {
   FirebaseAuth _auth = FirebaseAuth.instance;
 
   try {
     await _auth.signOut().then((value) {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => LoginScreen()));
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (_) => LoginScreen()));
     });
   } catch (e) {
     print("error");
     return null;
   }
 }
-
 
 Future<String?> getUserType(String uid) async {
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -125,8 +123,7 @@ Future<String?> getUserType(String uid) async {
         await _firestore.collection('users').doc(uid).get();
 
     if (snapshot.exists) {
-      Map<String, dynamic> userData =
-          snapshot.data() as Map<String, dynamic>;
+      Map<String, dynamic> userData = snapshot.data() as Map<String, dynamic>;
       String? userType = userData['userType'] as String?;
 
       return userType;
