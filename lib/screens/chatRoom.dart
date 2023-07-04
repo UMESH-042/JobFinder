@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:easy_pdf_viewer/easy_pdf_viewer.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
@@ -7,6 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:vuna__gigs/view/ChatScreen.dart';
+import 'package:file_picker/file_picker.dart';
 // import 'package:flutter_svg/svg.dart';
 
 class ChatRoomScreen extends StatefulWidget {
@@ -45,13 +47,15 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     super.dispose();
   }
 
-  void onSendMessage(String message, [String? imageUrl]) async {
-    if (message.isNotEmpty || imageUrl != null) {
+  void onSendMessage(String message,
+      [String? imageUrl, String? fileUrl]) async {
+    if (message.isNotEmpty || imageUrl != null || fileUrl != null) {
       try {
         Map<String, dynamic> messageData = {
           'sendBy': _auth.currentUser?.displayName,
           'message': message,
           'imageUrl': imageUrl,
+          'fileUrl': fileUrl,
           'time': FieldValue.serverTimestamp(),
           'repliedMessage': repliedMessage,
         };
@@ -92,74 +96,108 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     });
   }
 
+  Future<void> _sendFileMessage() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf'],
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      PlatformFile file = result.files.first;
+
+      File pdfFile = File(file.path!);
+      String fileUrl = await uploadFileToFirebase(pdfFile);
+
+      onSendMessage('', null, fileUrl);
+    }
+  }
+
+  Future<String> uploadFileToFirebase(File file) async {
+    String fileName = Uuid().v4();
+    Reference storageReference =
+        FirebaseStorage.instance.ref().child('chat_files/$fileName');
+    UploadTask uploadTask = storageReference.putFile(file);
+    TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() {});
+    String fileUrl = await taskSnapshot.ref.getDownloadURL();
+
+    return fileUrl;
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
       appBar: AppBar(
-  toolbarHeight: 70,
-  automaticallyImplyLeading: false,
-  // backgroundColor: Color.fromARGB(255, 235, 237, 240),
-  backgroundColor: Colors.transparent,
-  elevation: 0,
-  
-  leading: IconButton(
-    icon: Icon(
-      Icons.arrow_back_ios,
-      color: Colors.black,
-    ),
-    onPressed: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => ChatScreen(currentUserEmail: widget.currentUserEmail),
-        ),
-      );
-    },
-  ),
-  title: StreamBuilder<DocumentSnapshot>(
-    stream: _firestore.collection("users").doc(widget.userMap['uid']).snapshots(),
-    builder: (context, snapshot) {
-      if (snapshot.hasData) {
-        final userSnapshot = snapshot.data!;
-        final status = userSnapshot['status'];
-        final imageUrl = widget.userMap['imageUrl'];
+        toolbarHeight: 70,
+        automaticallyImplyLeading: false,
+        // backgroundColor: Color.fromARGB(255, 235, 237, 240),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
 
-        return Container(
-          child: Row(
-            children: [
-              CircleAvatar(
-                backgroundImage: NetworkImage(imageUrl),
-              ),
-              SizedBox(width: 8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.userMap['name'],
-                    style: TextStyle(color: Colors.black),
-                  ),
-                  Text(
-                    status,
-                    style: TextStyle(fontSize: 14, color: Colors.black),
-                  ),
-                ],
-              ),
-            ],
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_ios,
+            color: Colors.black,
           ),
-        );
-      } else {
-        return Container();
-      }
-    },
-  ),
-  actions: [
-    IconButton(onPressed: (){}, icon: Icon(Icons.phone),color: Colors.black,)
-  ],
-  
-),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) =>
+                    ChatScreen(currentUserEmail: widget.currentUserEmail),
+              ),
+            );
+          },
+        ),
+        title: StreamBuilder<DocumentSnapshot>(
+          stream: _firestore
+              .collection("users")
+              .doc(widget.userMap['uid'])
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              final userSnapshot = snapshot.data!;
+              final status = userSnapshot['status'];
+              final imageUrl = widget.userMap['imageUrl'];
+              final fileUrl=widget.userMap['fileUrl'];
 
+              return Container(
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundImage: NetworkImage(imageUrl),
+                    ),
+                    SizedBox(width: 8),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.userMap['name'],
+                          style: TextStyle(color: Colors.black),
+                        ),
+                        Text(
+                          status,
+                          style: TextStyle(fontSize: 14, color: Colors.black),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            } else {
+              return Container();
+            }
+          },
+        ),
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: Icon(Icons.phone),
+            color: Colors.black,
+          )
+        ],
+      ),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -246,6 +284,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                             otherUserName: isCurrentUser
                                 ? widget.userMap['name']
                                 : null, // Pass the other user's name if it's not the current user
+                                fileUrl: message['fileUrl'],
                           ),
                         );
                       },
@@ -342,7 +381,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                               //   // ),
                               // ),
                               Expanded(
-                              
                                 child: TextField(
                                   scrollPadding: EdgeInsets.all(5),
                                   controller: _messageController,
@@ -358,7 +396,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                               ),
 
                               IconButton(
-                                onPressed: () {},
+                                onPressed: _sendFileMessage,
                                 icon: Icon(Icons.attach_file),
                               ),
                               IconButton(
@@ -406,15 +444,18 @@ class MessageBubble extends StatelessWidget {
   final String? repliedMessage;
   final String? otherUserName; // Added otherUserName property
   final String? currentUserName;
+  final String? fileUrl; // Added fileUrl property
 
-  const MessageBubble(
-      {required this.message,
-      required this.isCurrentUser,
-      required this.timestamp,
-      this.onReply,
-      this.repliedMessage,
-      this.otherUserName, // Added otherUserName parameter
-      required this.currentUserName});
+  const MessageBubble({
+    required this.message,
+    required this.isCurrentUser,
+    required this.timestamp,
+    this.onReply,
+    this.repliedMessage,
+    this.otherUserName, // Added otherUserName parameter
+    required this.currentUserName,
+    this.fileUrl, // Added fileUrl parameter
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -460,7 +501,6 @@ class MessageBubble extends StatelessWidget {
                             : currentUserName!, // Updated condition
                         style: TextStyle(
                           fontSize: 12,
-                          // color: Colors.green,
                           color: otherUserName != null
                               ? Colors.orange
                               : Colors.green,
@@ -477,6 +517,52 @@ class MessageBubble extends StatelessWidget {
               ),
               SizedBox(height: 8),
             ],
+            // if (fileUrl != null) ...[
+            //   GestureDetector(
+            //     onTap: () {
+            //       Navigator.of(context).push(MaterialPageRoute(
+            //           builder: (context) => PdfViewer(PdfUrl: fileUrl!)));
+            //     },
+            //     child: Text(
+            //       fileUrl!,
+            //       style: TextStyle(
+            //         fontSize: 16,
+            //         color: Colors.white, // Adjust the color as needed
+            //         decoration: TextDecoration.underline,
+            //       ),
+            //     ),
+            //   ),
+            //   SizedBox(height: 8),
+            // ],
+            if (fileUrl != null) ...[
+  GestureDetector(
+    onTap: () {
+      Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => PdfViewer(PdfUrl: fileUrl!)));
+    },
+    child: Container(
+      width: 140,
+
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.picture_as_pdf, color: Colors.black),
+          SizedBox(width: 5),
+          Text(
+            'View PDF',
+            style: TextStyle(color: Colors.black),
+          ),
+        ],
+      ),
+    ),
+  ),
+  SizedBox(height: 8),
+],
+
             Text(
               message,
               style: TextStyle(
@@ -493,6 +579,41 @@ class MessageBubble extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class PdfViewer extends StatefulWidget {
+  final String PdfUrl;
+  const PdfViewer({super.key, required this.PdfUrl});
+
+  @override
+  State<PdfViewer> createState() => _PdfViewerState();
+}
+
+class _PdfViewerState extends State<PdfViewer> {
+  PDFDocument? document;
+
+  void initialisePdf() async {
+    document = await PDFDocument.fromURL(widget.PdfUrl);
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    initialisePdf();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: document != null
+          ? PDFViewer(document: document!)
+          : Center(
+              child: CircularProgressIndicator(),
+            ),
     );
   }
 }

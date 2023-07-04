@@ -1,15 +1,14 @@
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:vuna__gigs/screens/signup_screen.dart';
-
+import 'package:vuna__gigs/view/AdminHomesScreen.dart';
 
 import '../view/Home_Screen.dart';
 import 'methods.dart';
 
 class LoginScreen extends StatefulWidget {
   // const LoginScreen({Key key}) : super(key: key);
-    const LoginScreen({super.key});
+  const LoginScreen({super.key});
 
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -72,13 +71,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   SizedBox(
-                    height: size.height /15,
+                    height: size.height / 15,
                   ),
                   Container(
                     width: size.width,
                     alignment: Alignment.center,
-                    child: field(
-                        size, "Email Address", Icons.account_box, _email),
+                    child:
+                        field(size, "Email Address", Icons.account_box, _email),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 18.0),
@@ -144,11 +143,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(
                     height: size.height / 22,
                   ),
-                 
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                       Text('New User?',style:TextStyle(fontWeight: FontWeight.w500)),
+                      Text('New User?',
+                          style: TextStyle(fontWeight: FontWeight.w500)),
                       GestureDetector(
                         onTap: () => Navigator.of(context).push(
                             MaterialPageRoute(builder: (_) => CreateAccount())),
@@ -168,6 +168,39 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  // Widget customButton(Size size) {
+  //   return GestureDetector(
+  //     onTap: () {
+  //       if (_email.text.isNotEmpty && _password.text.isNotEmpty) {
+  //         setState(() {
+  //           isloading = true;
+  //         });
+
+  //         Login(_email.text, _password.text).then((user) {
+  //           if (user != null) {
+  //             print("Login Successful");
+  //             setState(() {
+  //               isloading = false;
+  //             });
+  //             Navigator.push(
+  //               context,
+  //               MaterialPageRoute(
+  //                 builder: (_) => HomePage(
+  //                   currentUserEmail: _email.text,
+  //                 ),
+  //               ),
+  //             );
+  //           } else {
+  //             print("Login Failed");
+  //             setState(() {
+  //               isloading = false;
+  //             });
+  //           }
+  //         });
+  //       } else {
+  //         print("Please fill the form correctly!");
+  //       }
+  //     },
   Widget customButton(Size size) {
     return GestureDetector(
       onTap: () {
@@ -175,20 +208,41 @@ class _LoginScreenState extends State<LoginScreen> {
           setState(() {
             isloading = true;
           });
+
           Login(_email.text, _password.text).then((user) {
             if (user != null) {
               print("Login Successful");
               setState(() {
                 isloading = false;
               });
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => HomePage(
-                    currentUserEmail: _email.text,
-                  ),
-                ),
-              );
+
+              getUserType(user.uid).then((String? userType) {
+                if (userType == 'admin') {
+                  // Navigate to AdminScreen
+                  print('Login As Admin');
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => AdminHomeScreen(
+                              currentuserEmail: _email.text,
+                            )),
+                  );
+                } else if (userType == 'user') {
+                  // Navigate to HomeScreen
+                  print('Login As User');
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => HomePage(
+                        currentUserEmail: _email.text,
+                      ),
+                    ),
+                  );
+                } else {
+                  print("Invalid UserType");
+                }
+              });
             } else {
               print("Login Failed");
               setState(() {
@@ -200,7 +254,6 @@ class _LoginScreenState extends State<LoginScreen> {
           print("Please fill the form correctly!");
         }
       },
-
       child: Container(
         height: size.height / 14,
         width: size.width / 1.2,
@@ -212,9 +265,7 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Text(
           "LOG IN ",
           style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold),
+              color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
         ),
       ),
     );

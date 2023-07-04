@@ -1,6 +1,7 @@
 
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:vuna__gigs/view/Home_Screen.dart';
@@ -16,18 +17,41 @@ class ChatScreen extends StatefulWidget {
   _ChatScreenState createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatScreenState extends State<ChatScreen>with WidgetsBindingObserver  {
   late Stream<QuerySnapshot> _usersStream;
   TextEditingController _searchController = TextEditingController();
   List<DocumentSnapshot> _usersList = [];
   List<Map<String, dynamic>> searchResults = [];
   bool isLoading = false;
+    final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
 
   @override
   void initState() {
     super.initState();
     _usersStream = FirebaseFirestore.instance.collection('users').snapshots();
+        WidgetsBinding.instance.addObserver(this);
+    setStatus("Online");
   }
+
+    void setStatus(String status) async {
+    await _firestore.collection('users').doc(_auth.currentUser!.uid).update({
+      "status": status,
+    });
+  }
+
+    @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      //Online
+      setStatus("online");
+    } else {
+      //Offline
+      setStatus("Offline");
+    }
+  }
+
 
   @override
   void dispose() {
@@ -112,7 +136,7 @@ String chatRoomId(String user1, String user2) {
                 context,
                 MaterialPageRoute(
                     builder: (_) =>
-                        HomePage(currentUserEmail: widget.currentUserEmail)));
+                        HomePage(currentUserEmail: widget.currentUserEmail,)));
           },
         ),
         title: Container(

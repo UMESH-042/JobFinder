@@ -23,132 +23,55 @@ class JobDetailsPage extends StatelessWidget {
     required this.postedby,
   });
 
-  // Widget button(BuildContext context) {
-  //   return InkWell(
-  //     onTap: () {
-  //       // Handle adding the job
-  //     },
-  //     child: Container(
-  //       margin: EdgeInsets.all(20),
-  //       width: MediaQuery.of(context).size.width,
-  //       height: 55,
-  //       decoration: BoxDecoration(
-  //         color: Color.fromARGB(255, 76, 175, 142),
-  //         borderRadius: BorderRadius.circular(15),
-  //       ),
-  //       child: Center(
-  //         child: Text(
-  //           "Apply for Job",
-  //           style: TextStyle(
-  //             color: Colors.white,
-  //             fontWeight: FontWeight.bold,
-  //             fontSize: 17,
-  //           ),
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
-  // String ChatRoomId(String user1, String user2) {
-  //   if (user1[0].toLowerCase().codeUnits[0] >
-  //       user2.toLowerCase().codeUnits[0]) {
-  //     return "$user1$user2";
-  //   } else {
-  //     return "$user2$user1";
-  //   }
-  // }
-
-  // Future<void> sendMessageToPostedByUser(String currentUserEmail) async {
-  //   try {
-  //     final FirebaseAuth _auth = FirebaseAuth.instance;
-  //     final CollectionReference chatroomCollection =
-  //         FirebaseFirestore.instance.collection('chatroom');
-
-  //     // Create a chat room with a unique ID
-  //     // final chatRoomId = _auth.currentUser!.uid + postedby;
-  //     final chatRoomId = ChatRoomId(currentUserEmail, postedby);
-
-  //     // Check if the chat room already exists
-  //     final chatRoomSnapshot = await chatroomCollection.doc(chatRoomId).get();
-  //     if (!chatRoomSnapshot.exists) {
-  //       // Create the chat room document
-  //       final Map<String, dynamic> chatRoomData = {
-  //         'users': [postedby, currentUserEmail],
-  //         'createdAt': FieldValue.serverTimestamp(),
-  //       };
-  //       await chatroomCollection.doc(chatRoomId).set(chatRoomData);
-  //     }
-
-  //     // Get the chat room reference
-  //     final DocumentReference chatRoomRef = chatroomCollection.doc(chatRoomId);
-
-  //     // Create the message data
-  //     final Map<String, dynamic> messageData = {
-  //       'sendBy': _auth.currentUser?.displayName,
-  //       'message': 'I am interested in the job.',
-  //       'time': FieldValue.serverTimestamp(),
-  //     };
-
-  //     // Add the message to the chat room
-  //     await chatRoomRef.collection('chats').add(messageData);
-
-  //     // Success
-  //     print('Message sent successfully!');
-  //   } catch (e) {
-  //     // Error handling
-  //     print('Error sending message: $e');
-  //   }
-  // }
   String ChatRoomId(String user1, String user2) {
-  if (user1[0].toLowerCase().codeUnits[0] >
-      user2.toLowerCase().codeUnits[0]) {
-    return "$user1$user2";
-  } else {
-    return "$user2$user1";
-  }
-}
-
-Future<void> sendMessageToPostedByUser(String currentUserEmail) async {
-  try {
-    final FirebaseAuth _auth = FirebaseAuth.instance;
-    final CollectionReference chatroomCollection =
-        FirebaseFirestore.instance.collection('chatroom');
-
-    // Create a chat room with a unique ID
-    final chatRoomId = ChatRoomId(currentUserEmail, postedby);
-
-    // Check if the chat room already exists
-    final chatRoomSnapshot = await chatroomCollection.doc(chatRoomId).get();
-    if (!chatRoomSnapshot.exists) {
-      // Create the chat room document
-      final Map<String, dynamic> chatRoomData = {
-        'users': [postedby, currentUserEmail],
-        'createdAt': FieldValue.serverTimestamp(),
-      };
-      await chatroomCollection.doc(chatRoomId).set(chatRoomData);
+    if (user1[0].toLowerCase().codeUnits[0] >
+        user2.toLowerCase().codeUnits[0]) {
+      return "$user1$user2";
+    } else {
+      return "$user2$user1";
     }
-
-    // Get the chat room reference
-    final DocumentReference chatRoomRef = chatroomCollection.doc(chatRoomId);
-
-    // Create the message data
-    final Map<String, dynamic> messageData = {
-      'sendBy': _auth.currentUser?.displayName,
-      'message': 'I am interested in the job.',
-      'time': FieldValue.serverTimestamp(),
-    };
-
-    // Add the message to the chat room
-    await chatRoomRef.collection('chats').add(messageData);
-
-    // Success
-    print('Message sent successfully!');
-  } catch (e) {
-    // Error handling
-    print('Error sending message: $e');
   }
-}
 
+  Future<void> sendMessageToPostedByUser(String currentUserEmail) async {
+    try {
+      final FirebaseAuth _auth = FirebaseAuth.instance;
+      final CollectionReference chatroomCollection =
+          FirebaseFirestore.instance.collection('chatroom');
+
+      // Create a chat room with a unique ID
+      final chatRoomId = ChatRoomId(currentUserEmail, postedby);
+
+      // Check if the chat room already exists
+      final chatRoomSnapshot = await chatroomCollection.doc(chatRoomId).get();
+      if (!chatRoomSnapshot.exists) {
+        // Create the chat room document
+        final Map<String, dynamic> chatRoomData = {
+          'users': [postedby, currentUserEmail],
+          'createdAt': FieldValue.serverTimestamp(),
+        };
+        await chatroomCollection.doc(chatRoomId).set(chatRoomData);
+      }
+
+      // Get the chat room reference
+      final DocumentReference chatRoomRef = chatroomCollection.doc(chatRoomId);
+
+      // Create the message data
+      final Map<String, dynamic> messageData = {
+        'sendBy': _auth.currentUser?.displayName,
+        'message': 'I am interested in the job.',
+        'time': FieldValue.serverTimestamp(),
+      };
+
+      // Add the message to the chat room
+      await chatRoomRef.collection('chats').add(messageData);
+
+      // Success
+      print('Message sent successfully!');
+    } catch (e) {
+      // Error handling
+      print('Error sending message: $e');
+    }
+  }
 
   Widget button(BuildContext context) {
     return InkWell(
@@ -313,3 +236,6 @@ Future<void> sendMessageToPostedByUser(String currentUserEmail) async {
     );
   }
 }
+
+
+

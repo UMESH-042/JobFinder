@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:vuna__gigs/view/add_jobs.dart';
+import 'package:vuna__gigs/view/Edit_profile_page.dart';
 
 import '../screens/login_screen.dart';
 import 'ChatScreen.dart';
@@ -31,100 +32,39 @@ class _HomePageState extends State<HomePage> {
   late List<Widget> _screens;
 
   @override
-    late String _imageUrl='';
+  late String _imageUrl = '';
 
-  //  Future<void> _uploadImage() async {
-  //   final pickedFile = await ImagePicker().getImage(source: ImageSource.gallery);
-  //   if (pickedFile != null) {
-  //     final file = File(pickedFile.path);
-  //     final fileName = path.basename(file.path);
-  //     final storageRef = FirebaseStorage.instance.ref().child('user_images/$fileName');
-
-  //     try {
-  //       await storageRef.putFile(file);
-  //       final downloadUrl = await storageRef.getDownloadURL();
-  //       setState(() {
-  //         _imageUrl = downloadUrl;
-  //       });
-
-  //         final userDocRef = FirebaseFirestore.instance.collection('users').doc(widget.currentUserEmail);
-  //     await userDocRef.update({'imageUrl': downloadUrl});
-
-  //     } catch (error) {
-  //       // Handle error uploading image
-  //       print('Error uploading image: $error');
-  //     }
-  //   }
-  // }
-String? getCurrentUser() {
-  User? user = FirebaseAuth.instance.currentUser;
-  if (user != null) {
-    String uid = user.uid;
-    return uid;
-  } else {
-    // User is not signed in
-    return null;
-  }
-  
-}
-
-
-  Future<void> _uploadImage() async {
-  final pickedFile = await ImagePicker().getImage(source: ImageSource.gallery);
-  if (pickedFile != null) {
-    final file = File(pickedFile.path);
-    if (file.existsSync()) {
-      final fileName = path.basename(file.path);
-      final storageRef = FirebaseStorage.instance.ref().child('user_images/$fileName');
-
-      try {
-        await storageRef.putFile(file);
-        final downloadUrl = await storageRef.getDownloadURL();
-        setState(() {
-          _imageUrl = downloadUrl;
-        });
-
-        // Update user data in Firestore
-        final userDocRef = FirebaseFirestore.instance.collection('users').doc(getCurrentUser());
-         final userDocSnapshot = await userDocRef.get();
-        if (userDocSnapshot.exists) {
-          // Update user data in Firestore
-          await userDocRef.update({'imageUrl': downloadUrl});
-        } else {
-          // Create new user document
-          await userDocRef.set({'email': widget.currentUserEmail, 'imageUrl': downloadUrl});
-        }
-        
-      } catch (error) {
-        // Handle error uploading image
-        print('Error uploading image: $error');
-      }
+  String? getCurrentUser() {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      String uid = user.uid;
+      return uid;
     } else {
-      print('File does not exist at path: ${file.path}');
+      // User is not signed in
+      return null;
     }
   }
-}
-
-
-
 
   void initState() {
     super.initState();
-     String? currentUID = getCurrentUser();
+    String? currentUID = getCurrentUser();
     _screens = [
       JobListPage(),
-      ChatScreen(currentUserEmail: widget.currentUserEmail,),
+      ChatScreen(
+        currentUserEmail: widget.currentUserEmail,
+      ),
       ProfileScreen(),
       SettingsScreen(),
     ];
-  final userDocRef = FirebaseFirestore.instance.collection('users').doc(currentUID);
-  userDocRef.get().then((snapshot) {
-    if (snapshot.exists) {
-      setState(() {
-        _imageUrl = snapshot.data()?['imageUrl'] ?? '';
-      });
-    }
-  });
+    final userDocRef =
+        FirebaseFirestore.instance.collection('users').doc(currentUID);
+    userDocRef.get().then((snapshot) {
+      if (snapshot.exists) {
+        setState(() {
+          _imageUrl = snapshot.data()?['imageUrl'] ?? '';
+        });
+      }
+    });
   }
 
   @override
@@ -168,10 +108,9 @@ String? getCurrentUser() {
                     padding: EdgeInsets.all(0),
                     icon: CircleAvatar(
                       backgroundColor: Color.fromARGB(255, 76, 175, 142),
-                      
                       backgroundImage: NetworkImage(_imageUrl),
                     ),
-                    onPressed: _uploadImage,
+                    onPressed: () {},
                   ),
                 ),
               ],
@@ -221,7 +160,11 @@ String? getCurrentUser() {
                       title: Text('Edit Profile'),
                       onTap: () {
                         // Handle the tap on Edit Profile
-                        Navigator.pop(context);
+                        // Navigator.pop(context);
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => EditProfilePage()));
                       },
                     ),
                     SizedBox(
@@ -393,7 +336,9 @@ String? getCurrentUser() {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>AddJobs(otherUserEmail: widget.currentUserEmail,),
+                    builder: (context) => AddJobs(
+                      otherUserEmail: widget.currentUserEmail,
+                    ),
                   ),
                 );
               },

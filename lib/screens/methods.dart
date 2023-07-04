@@ -25,6 +25,7 @@ Future<User?> createAccount(String name, String email, String password) async {
         "email": email,
         "status": "unavailable",
         "uid":_auth.currentUser!.uid,
+        "admin":"user",
       });
       return user;
     } else {
@@ -56,6 +57,52 @@ Future<User?> Login(String email, String password) async {
   }
 }
 
+// Future<User?> login(String email, String password) async {
+//   FirebaseAuth _auth = FirebaseAuth.instance;
+//   FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+//   try {
+//     User? user = (await _auth.signInWithEmailAndPassword(
+//       email: email,
+//       password: password,
+//     ))
+//         .user;
+
+//     if (user != null) {
+//       DocumentSnapshot snapshot = await _firestore
+//           .collection('users')
+//           .doc(user.uid)
+//           .get();
+
+//       if (snapshot.exists) {
+//         Map<String, dynamic> userData = snapshot.data() as Map<String, dynamic>;
+//         String userType = userData['UserType'];
+
+//         if (userType == 'admin') {
+//           print("Admin Login Successful");
+//           return user;
+//         } else if (userType == 'user') {
+//           print("User Login Successful");
+//           return user;
+//         } else {
+//           print("Invalid UserType");
+//           return null;
+//         }
+//       } else {
+//         print("User data not found");
+//         return null;
+//       }
+//     } else {
+//       print("Login Failed");
+//       return null;
+//     }
+//   } catch (e) {
+//     print(e);
+//     return null;
+//   }
+// }
+
+
 Future logOut(BuildContext context) async {
   FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -67,4 +114,28 @@ Future logOut(BuildContext context) async {
     print("error");
     return null;
   }
+}
+
+
+Future<String?> getUserType(String uid) async {
+  FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  try {
+    DocumentSnapshot snapshot =
+        await _firestore.collection('users').doc(uid).get();
+
+    if (snapshot.exists) {
+      Map<String, dynamic> userData =
+          snapshot.data() as Map<String, dynamic>;
+      String? userType = userData['userType'] as String?;
+
+      return userType;
+    } else {
+      print("User data not found");
+    }
+  } catch (e) {
+    print(e);
+  }
+
+  return '';
 }
