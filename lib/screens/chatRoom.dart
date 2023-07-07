@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:easy_pdf_viewer/easy_pdf_viewer.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
@@ -9,6 +11,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:vuna__gigs/view/ChatScreen.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:http/http.dart' as http;
+
+import '../notification/notification_service.dart';
+
 // import 'package:flutter_svg/svg.dart';
 
 class ChatRoomScreen extends StatefulWidget {
@@ -29,6 +35,8 @@ class ChatRoomScreen extends StatefulWidget {
 }
 
 class _ChatRoomScreenState extends State<ChatRoomScreen> {
+  NotificationsService notificationsService = NotificationsService();
+
   final TextEditingController _messageController = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -36,9 +44,43 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   String? repliedMessage;
 
   final FocusNode _messageFocusNode = FocusNode();
+
+  storeNotificationToken() async {
+    String? token = await FirebaseMessaging.instance.getToken();
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .set({
+      'token': token,
+    }, SetOptions(merge: true));
+  }
+
+  Future<String?> getNotificationTokenForUser(String userEmail) async {
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .where('email', isEqualTo: userEmail)
+        .limit(1)
+        .get();
+
+    if (snapshot.docs.isNotEmpty) {
+      final userDoc = snapshot.docs.first;
+      return userDoc.get('token') as String?;
+    }
+
+    return null;
+  }
+
   @override
   void initState() {
     super.initState();
+    FirebaseMessaging.instance.getInitialMessage();
+    FirebaseMessaging.onMessage.listen((event) {
+      // print('FCM Message Received');
+      LocalNotificationService.display(event);
+    });
+
+    storeNotificationToken();
+    notificationsService.initialiseNotifications();
   }
 
   @override
@@ -51,6 +93,28 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
       [String? imageUrl, String? fileUrl]) async {
     if (message.isNotEmpty || imageUrl != null || fileUrl != null) {
       try {
+        if (_auth.currentUser?.displayName != widget.userMap['name']) {
+          // Show local notification to the current user
+          //  String? username=_auth.currentUser?.displayName;
+        String? token =
+            await getNotificationTokenForUser(widget.otherUserEmail);
+        if (token != null) {
+          sendNotification(message, token);
+          print('Notification successful!');
+        } else {
+          print('Notification Failed!');
+        }
+        }
+        // String? token =
+        //     await getNotificationTokenForUser(widget.otherUserEmail);
+        // if (token != null) {
+        //   sendNotification(message, token);
+        //   print('Notification successful!');
+        // } else {
+        //   print('Notification Failed!');
+        // }
+        // print(token);
+
         Map<String, dynamic> messageData = {
           'sendBy': _auth.currentUser?.displayName,
           'message': message,
@@ -76,6 +140,40 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     } else {
       print('Enter some Text');
     }
+  }
+
+  sendNotification(String title, String token) async {
+    final data = {
+      'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+      'id': '1',
+      'status': 'done',
+      'message': title,
+    };
+
+    try {
+      http.Response response =
+          await http.post(Uri.parse('https://fcm.googleapis.com/fcm/send'),
+              headers: <String, String>{
+                'Content-Type': 'application/json',
+                'Authorization':
+                    'key=AAAA6msbZ3E:APA91bHFliFq8amgNOiLnltmuo2AxFHnxfLoFk6uVeSf1LEH7jti-i7l-jtiuFZN61koUeAC94Wa_ckPSE5Ao8xFfK_fiDxtV4sArdob_scjxoVcqXnBTulJ_SH6tE48u0RJGiZyEV_p'
+              },
+              body: jsonEncode(<String, dynamic>{
+                'notification': <String, dynamic>{
+                  'title': title,
+                  'body': 'You are followed by someone'
+                },
+                'priority': 'high',
+                'data': data,
+                'to': '$token'
+              }));
+
+      if (response.statusCode == 200) {
+        print("Yeh notificatin is sended");
+      } else {
+        print("Error");
+      }
+    } catch (e) {}
   }
 
   void replyToMessage(String message) {
@@ -160,7 +258,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
               final userSnapshot = snapshot.data!;
               final status = userSnapshot['status'];
               final imageUrl = widget.userMap['imageUrl'];
-              final fileUrl=widget.userMap['fileUrl'];
+              final fileUrl = widget.userMap['fileUrl'];
+              final userType = widget.userMap['userType'];
 
               return Container(
                 child: Row(
@@ -172,10 +271,16 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          widget.userMap['name'],
-                          style: TextStyle(color: Colors.black),
-                        ),
+                        userType == 'admin'
+                            ? Text(
+                                widget.userMap['name'] + '(Admin)',
+                                style: TextStyle(
+                                    color: Colors.black, fontSize: 18),
+                              )
+                            : Text(
+                                widget.userMap['name'],
+                                style: TextStyle(color: Colors.black),
+                              ),
                         Text(
                           status,
                           style: TextStyle(fontSize: 14, color: Colors.black),
@@ -284,7 +389,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                             otherUserName: isCurrentUser
                                 ? widget.userMap['name']
                                 : null, // Pass the other user's name if it's not the current user
-                                fileUrl: message['fileUrl'],
+                            fileUrl: message['fileUrl'],
                           ),
                         );
                       },
@@ -535,33 +640,32 @@ class MessageBubble extends StatelessWidget {
             //   SizedBox(height: 8),
             // ],
             if (fileUrl != null) ...[
-  GestureDetector(
-    onTap: () {
-      Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => PdfViewer(PdfUrl: fileUrl!)));
-    },
-    child: Container(
-      width: 140,
-
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.picture_as_pdf, color: Colors.black),
-          SizedBox(width: 5),
-          Text(
-            'View PDF',
-            style: TextStyle(color: Colors.black),
-          ),
-        ],
-      ),
-    ),
-  ),
-  SizedBox(height: 8),
-],
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => PdfViewer(PdfUrl: fileUrl!)));
+                },
+                child: Container(
+                  width: 140,
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.picture_as_pdf, color: Colors.black),
+                      SizedBox(width: 5),
+                      Text(
+                        'View PDF',
+                        style: TextStyle(color: Colors.black),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: 8),
+            ],
 
             Text(
               message,

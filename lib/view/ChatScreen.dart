@@ -1,5 +1,3 @@
-
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -17,31 +15,30 @@ class ChatScreen extends StatefulWidget {
   _ChatScreenState createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen>with WidgetsBindingObserver  {
+class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
   late Stream<QuerySnapshot> _usersStream;
   TextEditingController _searchController = TextEditingController();
   List<DocumentSnapshot> _usersList = [];
   List<Map<String, dynamic>> searchResults = [];
   bool isLoading = false;
-    final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
 
   @override
   void initState() {
     super.initState();
     _usersStream = FirebaseFirestore.instance.collection('users').snapshots();
-        WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
     setStatus("Online");
   }
 
-    void setStatus(String status) async {
+  void setStatus(String status) async {
     await _firestore.collection('users').doc(_auth.currentUser!.uid).update({
       "status": status,
     });
   }
 
-    @override
+  @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       //Online
@@ -51,7 +48,6 @@ class _ChatScreenState extends State<ChatScreen>with WidgetsBindingObserver  {
       setStatus("Offline");
     }
   }
-
 
   @override
   void dispose() {
@@ -87,7 +83,7 @@ class _ChatScreenState extends State<ChatScreen>with WidgetsBindingObserver  {
     });
   }
 
-String chatRoomId(String user1, String user2) {
+  String chatRoomId(String user1, String user2) {
     if (user1[0].toLowerCase().codeUnits[0] >
         user2.toLowerCase().codeUnits[0]) {
       return "$user1$user2";
@@ -97,7 +93,7 @@ String chatRoomId(String user1, String user2) {
   }
 
   void openChatRoom(DocumentSnapshot user) {
-     Map<String, dynamic> userMap = user.data() as Map<String, dynamic>;
+    Map<String, dynamic> userMap = user.data() as Map<String, dynamic>;
     String roomId = chatRoomId(
       widget.currentUserEmail,
       userMap['email'],
@@ -116,9 +112,9 @@ String chatRoomId(String user1, String user2) {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
+       final size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 249, 250, 251),
       appBar: AppBar(
@@ -135,8 +131,9 @@ String chatRoomId(String user1, String user2) {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (_) =>
-                        HomePage(currentUserEmail: widget.currentUserEmail,)));
+                    builder: (_) => HomePage(
+                          currentUserEmail: widget.currentUserEmail,
+                        )));
           },
         ),
         title: Container(
@@ -199,9 +196,9 @@ String chatRoomId(String user1, String user2) {
                     final userName = user['name'];
                     final userEmail = user['email'];
                     final imageUrl = user['imageUrl'];
+                    final userType = user['userType'];
 
                     return Padding(
-                      
                       padding: EdgeInsets.symmetric(
                         vertical: 8.0,
                         horizontal: 16.0,
@@ -215,7 +212,7 @@ String chatRoomId(String user1, String user2) {
                           leading: CircleAvatar(
                             backgroundImage: NetworkImage(imageUrl),
                           ),
-                          title: Text(userName),
+                          title: userType=='admin'? Text(userName+'(Admin)'):Text(userName),
                           subtitle: Text(userEmail),
                           // Other user details can be displayed here
                         ),

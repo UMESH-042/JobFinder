@@ -1,8 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
-class JobDetailsPage extends StatelessWidget {
+class JobDetailsPage extends StatefulWidget {
   final String location;
   final String salary;
   final String category;
@@ -23,6 +24,13 @@ class JobDetailsPage extends StatelessWidget {
     required this.postedby,
   });
 
+  @override
+  State<JobDetailsPage> createState() => _JobDetailsPageState();
+}
+
+class _JobDetailsPageState extends State<JobDetailsPage> {
+  bool _isLoading = false;
+
   String ChatRoomId(String user1, String user2) {
     if (user1[0].toLowerCase().codeUnits[0] >
         user2.toLowerCase().codeUnits[0]) {
@@ -38,47 +46,61 @@ class JobDetailsPage extends StatelessWidget {
       final CollectionReference chatroomCollection =
           FirebaseFirestore.instance.collection('chatroom');
 
-      // Create a chat room with a unique ID
-      final chatRoomId = ChatRoomId(currentUserEmail, postedby);
+      final chatRoomId = ChatRoomId(currentUserEmail, widget.postedby);
 
-      // Check if the chat room already exists
       final chatRoomSnapshot = await chatroomCollection.doc(chatRoomId).get();
       if (!chatRoomSnapshot.exists) {
-        // Create the chat room document
         final Map<String, dynamic> chatRoomData = {
-          'users': [postedby, currentUserEmail],
+          'users': [widget.postedby, currentUserEmail],
           'createdAt': FieldValue.serverTimestamp(),
         };
         await chatroomCollection.doc(chatRoomId).set(chatRoomData);
       }
 
-      // Get the chat room reference
       final DocumentReference chatRoomRef = chatroomCollection.doc(chatRoomId);
 
-      // Create the message data
       final Map<String, dynamic> messageData = {
         'sendBy': _auth.currentUser?.displayName,
         'message': 'I am interested in the job.',
         'time': FieldValue.serverTimestamp(),
       };
 
-      // Add the message to the chat room
       await chatRoomRef.collection('chats').add(messageData);
 
-      // Success
       print('Message sent successfully!');
     } catch (e) {
-      // Error handling
       print('Error sending message: $e');
+      throw e;
     }
   }
 
   Widget button(BuildContext context) {
     return InkWell(
       onTap: () {
-        // Handle adding the job
         String currentUserEmail = FirebaseAuth.instance.currentUser!.email!;
-        sendMessageToPostedByUser(currentUserEmail);
+        setState(() {
+          _isLoading = true;
+        });
+        sendMessageToPostedByUser(currentUserEmail).then((_) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Successfully Applied'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.pop(context);
+        }).catchError((error) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Application Failed'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }).whenComplete(() {
+          setState(() {
+            _isLoading = false;
+          });
+        });
       },
       child: Container(
         margin: EdgeInsets.all(20),
@@ -89,14 +111,19 @@ class JobDetailsPage extends StatelessWidget {
           borderRadius: BorderRadius.circular(15),
         ),
         child: Center(
-          child: Text(
-            "Apply for Job",
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 17,
-            ),
-          ),
+          child: _isLoading
+              ? SpinKitCircle(
+                  color: Colors.white,
+                  size: 25.0,
+                )
+              : Text(
+                  "Apply for Job",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 17,
+                  ),
+                ),
         ),
       ),
     );
@@ -105,33 +132,29 @@ class JobDetailsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   title: Text('Job Details'),
-      // ),
       body: SingleChildScrollView(
         child: Column(
           children: [
             Container(
               height: 200,
-              color: Colors.black, // Background color for the image container
-              child: image != null
+              color: Colors.black,
+              child: widget.image != null
                   ? Image.network(
-                      image!,
+                      widget.image!,
                       fit: BoxFit.cover,
-                      // width: double.infinity,
                       width: 200,
                       height: 200,
                     )
                   : null,
             ),
             Container(
-              color: Colors.white, // Background color for the details container
+              color: Colors.white,
               padding: EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    category,
+                    widget.category,
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -139,7 +162,7 @@ class JobDetailsPage extends StatelessWidget {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    jobtype,
+                    widget.jobtype,
                     style: TextStyle(
                       fontSize: 18,
                       color: Colors.grey[600],
@@ -155,7 +178,7 @@ class JobDetailsPage extends StatelessWidget {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    description,
+                    widget.description,
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.grey[600],
@@ -171,7 +194,7 @@ class JobDetailsPage extends StatelessWidget {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    requirements,
+                    widget.requirements,
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.grey[600],
@@ -187,7 +210,7 @@ class JobDetailsPage extends StatelessWidget {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    location,
+                    widget.location,
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.grey[600],
@@ -203,7 +226,7 @@ class JobDetailsPage extends StatelessWidget {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    postedby,
+                    widget.postedby,
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.grey[600],
@@ -219,7 +242,7 @@ class JobDetailsPage extends StatelessWidget {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    '\$$salary/m',
+                    '\$${widget.salary}/m',
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.grey[600],
@@ -236,6 +259,3 @@ class JobDetailsPage extends StatelessWidget {
     );
   }
 }
-
-
-
