@@ -19,6 +19,12 @@ class _CreateAccountState extends State<CreateAccount> {
   final TextEditingController _password = TextEditingController();
   bool isloading = false;
 
+    void showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -155,7 +161,8 @@ class _CreateAccountState extends State<CreateAccount> {
     );
   }
 
-  Widget customButton(Size size) {
+  
+   Widget customButton(Size size) {
     return GestureDetector(
       onTap: () {
         if (_name.text.isNotEmpty &&
@@ -170,18 +177,22 @@ class _CreateAccountState extends State<CreateAccount> {
                 isloading = false;
               });
               print("Account Created Successful");
+              showSnackBar("Account Created Successful");
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => HomePage(
-                      currentUserEmail: _email.text,
-                    ),
-                  ));
+                context,
+                MaterialPageRoute(
+                  builder: (_) => HomePage(
+                    currentUserEmail: _email.text,
+                    requiresProfileSetup: true,
+                  ),
+                ),
+              );
             } else {
               print("Account Creation Failed");
               setState(() {
                 isloading = false;
               });
+              showSnackBar("Account Creation Failed");
             }
           });
         }
@@ -197,7 +208,10 @@ class _CreateAccountState extends State<CreateAccount> {
         child: Text(
           "SIGN UP",
           style: TextStyle(
-              color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );

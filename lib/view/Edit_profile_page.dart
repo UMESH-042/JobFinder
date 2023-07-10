@@ -516,7 +516,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     context,
                     MaterialPageRoute(
                         builder: (_) => HomePage(
-                              currentUserEmail: _emailController.text,
+                              currentUserEmail: _emailController.text, requiresProfileSetup: false,
                             )));
                 // Navigate to home screen
                 // Navigator.of(context).pop();

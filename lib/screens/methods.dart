@@ -24,7 +24,8 @@ Future<User?> createAccount(String name, String email, String password) async {
         "email": email,
         "status": "unavailable",
         "uid": _auth.currentUser!.uid,
-        "admin": "user",
+        "userType": "user",
+        "imageUrl":"",
       });
       return user;
     } else {

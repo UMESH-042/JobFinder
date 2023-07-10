@@ -55,6 +55,7 @@ dependencies:
   easy_pdf_viewer: ^1.0.6
   fluttertoast: ^8.2.2
   http: ^1.1.0
+  shimmer: ^3.0.0
 
 
 

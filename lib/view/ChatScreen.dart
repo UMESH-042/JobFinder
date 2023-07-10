@@ -132,7 +132,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                 context,
                 MaterialPageRoute(
                     builder: (_) => HomePage(
-                          currentUserEmail: widget.currentUserEmail,
+                          currentUserEmail: widget.currentUserEmail, requiresProfileSetup: false,
                         )));
           },
         ),

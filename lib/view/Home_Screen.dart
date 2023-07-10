@@ -7,8 +7,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:vuna__gigs/notification/notification_service.dart';
 import 'package:vuna__gigs/view/add_jobs.dart';
 import 'package:vuna__gigs/view/Edit_profile_page.dart';
@@ -23,8 +25,9 @@ import 'package:http/http.dart' as http;
 
 class HomePage extends StatefulWidget {
   final String currentUserEmail;
+  final bool requiresProfileSetup;
 
-  const HomePage({Key? key, required this.currentUserEmail}) : super(key: key);
+  const HomePage({Key? key, required this.currentUserEmail, required this.requiresProfileSetup}) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -32,6 +35,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
+  bool isLoading = true;
 
   late List<Widget> _screens;
 
@@ -86,6 +90,27 @@ class _HomePageState extends State<HomePage> {
         });
       }
     });
+
+      Future.delayed(Duration(seconds: 2), () {
+      setState(() {
+        isLoading = false;
+      });
+    });
+
+      if (widget.requiresProfileSetup) {
+    WidgetsBinding.instance?.addPostFrameCallback((_) {
+      Fluttertoast.showToast(
+        msg: "Please set up your profile first.",
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.black87,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    });
+  }
+    
   }
 
   sendNotification(String title, String token) async {
@@ -297,7 +322,7 @@ class _HomePageState extends State<HomePage> {
               ),
             )
           : null,
-      body: Column(
+      body:isLoading?ShimmerEffect(): Column(
         children: [
           if (_currentIndex == 0)
             Container(
@@ -418,5 +443,84 @@ class AuthProvider with ChangeNotifier {
       print("error");
       return null;
     }
+  }
+}
+class ShimmerEffect extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    return Container(
+      width: screenWidth,
+      height: screenHeight,
+      child: Shimmer.fromColors(
+        baseColor: Colors.grey,
+        highlightColor: Colors.grey,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Placeholder content
+              SizedBox(height: 20),
+              Container(
+                width: screenWidth * 0.8,
+                height: 40,
+                color: Colors.white,
+              ),
+              SizedBox(height: 10),
+              Container(
+                width: screenWidth * 0.6,
+                height: 20,
+                color: Colors.white,
+              ),
+              SizedBox(height: 20),
+              Container(
+                width: screenWidth * 0.9,
+                height: 150,
+                color: Colors.white,
+              ),
+              SizedBox(height: 20),
+              Container(
+                width: screenWidth * 0.7,
+                height: 30,
+                color: Colors.white,
+              ),
+              SizedBox(height: 10),
+              Container(
+                width: screenWidth * 0.5,
+                height: 20,
+                color: Colors.white,
+              ),
+              SizedBox(height: 20),
+              Container(
+                width: screenWidth * 0.8,
+                height: 80,
+                color: Colors.white,
+              ),
+              SizedBox(height: 20),
+              Container(
+                width: screenWidth * 0.7,
+                height: 30,
+                color: Colors.white,
+              ),
+              SizedBox(height: 10),
+              Container(
+                width: screenWidth * 0.4,
+                height: 20,
+                color: Colors.white,
+              ),
+              SizedBox(height: 20),
+              Container(
+                width: screenWidth * 0.9,
+                height: 120,
+                color: Colors.white,
+              ),
+              SizedBox(height: 20),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
