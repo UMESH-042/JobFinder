@@ -9,22 +9,22 @@ import 'package:uuid/uuid.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:vuna__gigs/admin/userList.dart';
 import 'package:vuna__gigs/view/ChatScreen.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
-import 'package:vuna__gigs/view/Profile_Screen.dart';
 
 import '../notification/notification_service.dart';
 
 // import 'package:flutter_svg/svg.dart';
 
-class ChatRoomScreen extends StatefulWidget {
+class UserAdminChatRoom extends StatefulWidget {
   final String chatRoomId;
   final String currentUserEmail;
   final String otherUserEmail;
   final Map<String, dynamic> userMap;
 
-  const ChatRoomScreen({
+  const UserAdminChatRoom({
     required this.chatRoomId,
     required this.currentUserEmail,
     required this.otherUserEmail,
@@ -32,10 +32,10 @@ class ChatRoomScreen extends StatefulWidget {
   });
 
   @override
-  _ChatRoomScreenState createState() => _ChatRoomScreenState();
+  _UserAdminChatRoomState createState() => _UserAdminChatRoomState();
 }
 
-class _ChatRoomScreenState extends State<ChatRoomScreen> {
+class _UserAdminChatRoomState extends State<UserAdminChatRoom> {
   NotificationsService notificationsService = NotificationsService();
 
   final TextEditingController _messageController = TextEditingController();
@@ -97,14 +97,14 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
         if (_auth.currentUser?.displayName != widget.userMap['name']) {
           // Show local notification to the current user
           //  String? username=_auth.currentUser?.displayName;
-          String? token =
-              await getNotificationTokenForUser(widget.otherUserEmail);
-          if (token != null) {
-            sendNotification(message, token);
-            print('Notification successful!');
-          } else {
-            print('Notification Failed!');
-          }
+        String? token =
+            await getNotificationTokenForUser(widget.otherUserEmail);
+        if (token != null) {
+          sendNotification(message, token);
+          print('Notification successful!');
+        } else {
+          print('Notification Failed!');
+        }
         }
         // String? token =
         //     await getNotificationTokenForUser(widget.otherUserEmail);
@@ -244,7 +244,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
               context,
               MaterialPageRoute(
                 builder: (_) =>
-                    ChatScreen(currentUserEmail: widget.currentUserEmail),
+                    UsersList(currentUserEmail: widget.currentUserEmail),
               ),
             );
           },
@@ -261,44 +261,34 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
               final imageUrl = widget.userMap['imageUrl'];
               final fileUrl = widget.userMap['fileUrl'];
               final userType = widget.userMap['userType'];
-              final userId = widget.userMap['uid'];
 
-              return GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              ProfileScreen(useremail: userId)));
-                },
-                child: Container(
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        backgroundImage: NetworkImage(imageUrl),
-                      ),
-                      SizedBox(width: 8),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          userType == 'admin'
-                              ? Text(
-                                  widget.userMap['name'] + '(Admin)',
-                                  style: TextStyle(
-                                      color: Colors.black, fontSize: 18),
-                                )
-                              : Text(
-                                  widget.userMap['name'],
-                                  style: TextStyle(color: Colors.black),
-                                ),
-                          Text(
-                            status,
-                            style: TextStyle(fontSize: 14, color: Colors.black),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+              return Container(
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundImage: NetworkImage(imageUrl),
+                    ),
+                    SizedBox(width: 8),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        userType == 'admin'
+                            ? Text(
+                                widget.userMap['name'] + '(Admin)',
+                                style: TextStyle(
+                                    color: Colors.black, fontSize: 18),
+                              )
+                            : Text(
+                                widget.userMap['name'],
+                                style: TextStyle(color: Colors.black),
+                              ),
+                        Text(
+                          status,
+                          style: TextStyle(fontSize: 14, color: Colors.black),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               );
             } else {

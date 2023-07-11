@@ -20,7 +20,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
   TextEditingController _searchController = TextEditingController();
   List<DocumentSnapshot> _usersList = [];
   List<Map<String, dynamic>> searchResults = [];
-  bool isLoading = false;
+  bool isLoading = true;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -30,6 +30,13 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
     _usersStream = FirebaseFirestore.instance.collection('users').snapshots();
     WidgetsBinding.instance.addObserver(this);
     setStatus("Online");
+
+
+    Future.delayed(Duration(seconds: 2), () {
+      setState(() {
+        isLoading = false;
+      });
+    });
   }
 
   void setStatus(String status) async {
@@ -158,7 +165,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
           ),
         ),
       ),
-      body: Column(
+      body:isLoading? ShimmerEffect(): Column(
         children: [
           SizedBox(height: 20),
           Expanded(

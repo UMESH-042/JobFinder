@@ -54,6 +54,7 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:vuna__gigs/admin/userList.dart';
 import 'package:vuna__gigs/screens/methods.dart';
 import '../screens/login_screen.dart';
 
@@ -86,7 +87,15 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         ],
       ),
       body: Center(
-        child: Text('Admin Page'),
+        child: ElevatedButton(
+            onPressed: () {
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => UsersList(
+                          currentUserEmail: widget.currentuserEmail)));
+            },
+            child: Text('Users List')),
       ),
     );
   }

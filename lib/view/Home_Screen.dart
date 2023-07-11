@@ -14,6 +14,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:vuna__gigs/notification/notification_service.dart';
 import 'package:vuna__gigs/view/add_jobs.dart';
 import 'package:vuna__gigs/view/Edit_profile_page.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../screens/login_screen.dart';
 import 'ChatScreen.dart';
@@ -27,7 +28,11 @@ class HomePage extends StatefulWidget {
   final String currentUserEmail;
   final bool requiresProfileSetup;
 
-  const HomePage({Key? key, required this.currentUserEmail, required this.requiresProfileSetup}) : super(key: key);
+  const HomePage(
+      {Key? key,
+      required this.currentUserEmail,
+      required this.requiresProfileSetup})
+      : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -78,7 +83,7 @@ class _HomePageState extends State<HomePage> {
       ChatScreen(
         currentUserEmail: widget.currentUserEmail,
       ),
-      ProfileScreen(),
+      ProfileScreen(useremail: currentUID!,),
       SettingsScreen(),
     ];
     final userDocRef =
@@ -91,26 +96,44 @@ class _HomePageState extends State<HomePage> {
       }
     });
 
-      Future.delayed(Duration(seconds: 2), () {
+    Future.delayed(Duration(seconds: 2), () {
       setState(() {
         isLoading = false;
       });
     });
 
-      if (widget.requiresProfileSetup) {
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
-      Fluttertoast.showToast(
-        msg: "Please set up your profile first.",
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.black87,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
-    });
+    if (widget.requiresProfileSetup) {
+      WidgetsBinding.instance?.addPostFrameCallback((_) {
+        Fluttertoast.showToast(
+          msg: "Please set up your profile first.",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.black87,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+      });
+    }
+
+    _requestNotificationPermissions();
   }
-    
+
+  Future<void> _requestNotificationPermissions() async {
+    PermissionStatus status = await Permission.notification.request();
+    if (status.isGranted) {
+      // Notification permissions granted
+      // You can handle further notification setup here
+      print('Notification allowed');
+    } else if (status.isDenied) {
+      // Notification permissions denied
+      // You can display a message or perform any required action
+    } else if (status.isPermanentlyDenied) {
+      // Notification permissions permanently denied
+      // You can display a message or perform any required action
+      // You can navigate the user to the app settings to manually enable notification permissions
+      openAppSettings();
+    }
   }
 
   sendNotification(String title, String token) async {
@@ -322,54 +345,56 @@ class _HomePageState extends State<HomePage> {
               ),
             )
           : null,
-      body:isLoading?ShimmerEffect(): Column(
-        children: [
-          if (_currentIndex == 0)
-            Container(
-              height: 80,
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Search',
-                        prefixIcon: Icon(Icons.search),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        filled: true,
-                        fillColor: Colors.white,
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 10),
+      body: isLoading
+          ? ShimmerEffect()
+          : Column(
+              children: [
+                if (_currentIndex == 0)
                   Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.rectangle,
-                      borderRadius: BorderRadius.circular(10),
-                      color: Color.fromARGB(255, 76, 175, 142),
-                    ),
-                    margin: EdgeInsets.only(right: 4, left: 5),
-                    height: 50, // Adjust the height as needed
-                    child: IconButton(
-                      icon: Icon(Icons.filter_list),
-                      color: Colors.white,
-                      onPressed: () {
-                        // Handle filter button press
-                      },
+                    height: 80,
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            decoration: InputDecoration(
+                              hintText: 'Search',
+                              prefixIcon: Icon(Icons.search),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              filled: true,
+                              fillColor: Colors.white,
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 10),
+                        Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.rectangle,
+                            borderRadius: BorderRadius.circular(10),
+                            color: Color.fromARGB(255, 76, 175, 142),
+                          ),
+                          margin: EdgeInsets.only(right: 4, left: 5),
+                          height: 50, // Adjust the height as needed
+                          child: IconButton(
+                            icon: Icon(Icons.filter_list),
+                            color: Colors.white,
+                            onPressed: () {
+                              // Handle filter button press
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
+                Expanded(
+                  child: Center(
+                    child: _screens[_currentIndex],
+                  ),
+                ),
+              ],
             ),
-          Expanded(
-            child: Center(
-              child: _screens[_currentIndex],
-            ),
-          ),
-        ],
-      ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.vertical(
@@ -445,6 +470,7 @@ class AuthProvider with ChangeNotifier {
     }
   }
 }
+
 class ShimmerEffect extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
