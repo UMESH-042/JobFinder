@@ -21,21 +21,20 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isloading = false;
 
   Future<String?> checkUserStatus(String email) async {
-  final snapshot = await FirebaseFirestore.instance
-      .collection('users')
-      .where('email', isEqualTo: email)
-      .limit(1)
-      .get();
+    final snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .where('email', isEqualTo: email)
+        .limit(1)
+        .get();
 
-  if (snapshot.size > 0) {
-    final userMap = snapshot.docs[0].data();
-    final status = userMap['status'];
-    return status;
+    if (snapshot.size > 0) {
+      final userMap = snapshot.docs[0].data();
+      final status = userMap['status'];
+      return status;
+    }
+
+    return null;
   }
-
-  return null;
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -186,232 +185,125 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-// Widget customButton(Size size) {
-//   return GestureDetector(
-//     onTap: () {
-//       if (_email.text.isNotEmpty && _password.text.isNotEmpty) {
-//         setState(() {
-//           isloading = true;
-//         });
-
-//         showDialog(
-//           context: context,
-//           barrierDismissible: false,
-//           builder: (BuildContext context) {
-//             return AlertDialog(
-//               content: Row(
-//                 children: [
-//                   CircularProgressIndicator(),
-//                   SizedBox(width: 20),
-//                   Text("Please wait..."),
-//                 ],
-//               ),
-//             );
-//           },
-//         );
-       
-
-//         Login(_email.text, _password.text).then((user) {
-//           Navigator.pop(context); // Close the AlertDialog
-
-//           if (user != null) {
-//             print("Login Successful");
-//             setState(() {
-//               isloading = false;
-//             });
-
-//             getUserType(user.uid).then((String? userType) {
-//               if (userType == 'admin') {
-//                 // Navigate to AdminScreen
-//                 print('Login As Admin');
-
-//                 Navigator.pushReplacement(
-//                   context,
-//                   MaterialPageRoute(
-//                     builder: (_) => AdminHomeScreen(
-//                       currentuserEmail: _email.text,
-//                     ),
-//                   ),
-//                 );
-//               } else if (userType == 'user') {
-//                 // Navigate to HomeScreen
-//                 print('Login As User');
-//                 Navigator.pushReplacement(
-//                   context,
-//                   MaterialPageRoute(
-//                     builder: (_) => HomePage(
-//                       currentUserEmail: _email.text, requiresProfileSetup: true,
-//                     ),
-//                   ),
-//                 );
-//               } else {
-//                 print("Invalid UserType");
-//               }
-//             });
-
-//             // Show a success SnackBar
-//             final snackBar = SnackBar(content: Text('Login Successful'));
-//             ScaffoldMessenger.of(context).showSnackBar(snackBar);
-//           } else {
-//             print("Login Failed");
-//             setState(() {
-//               isloading = false;
-//             });
-
-//             // Show a failure SnackBar
-//             final snackBar = SnackBar(
-//               content: Text('Login Failed. Check Email/Password.'),
-//             );
-//             ScaffoldMessenger.of(context).showSnackBar(snackBar);
-//           }
-//         });
-//       } else {
-//         print("Please fill the form correctly!");
-//       }
-//     },
-//     child: Container(
-//       height: size.height / 14,
-//       width: size.width / 1.2,
-//       decoration: BoxDecoration(
-//         borderRadius: BorderRadius.circular(10),
-//         color: Color.fromARGB(255, 76, 175, 142),
-//       ),
-//       alignment: Alignment.center,
-//       child: isloading
-//           ? CircularProgressIndicator(
-//               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-//             )
-//           : Text(
-//               "LOG IN ",
-//               style: TextStyle(
-//                 color: Colors.white,
-//                 fontSize: 18,
-//                 fontWeight: FontWeight.bold,
-//               ),
-//             ),
-//     ),
-//   );
-// }
-Widget customButton(Size size) {
-  return GestureDetector(
-    onTap: () async {
-      if (_email.text.isNotEmpty && _password.text.isNotEmpty) {
-        setState(() {
-          isloading = true;
-        });
-
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              content: Row(
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(width: 20),
-                  Text("Please wait..."),
-                ],
-              ),
-            );
-          },
-        );
-
-        final status = await checkUserStatus(_email.text);
-
-        Navigator.pop(context); // Close the AlertDialog
-
-        if (status == 'Blocked') {
+  Widget customButton(Size size) {
+    return GestureDetector(
+      onTap: () async {
+        if (_email.text.isNotEmpty && _password.text.isNotEmpty) {
           setState(() {
-            isloading = false;
+            isloading = true;
           });
 
-          // Show a blocked SnackBar
-          final snackBar = SnackBar(content: Text('You are blocked'));
-          ScaffoldMessenger.of(context).showSnackBar(snackBar);
-        } else {
-          // Proceed with login
-          Login(_email.text, _password.text).then((user) {
-            if (user != null) {
-              print("Login Successful");
-              setState(() {
-                isloading = false;
-              });
-
-              getUserType(user.uid).then((String? userType) {
-                if (userType == 'admin') {
-                  // Navigate to AdminScreen
-                  print('Login As Admin');
-
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => AdminHomeScreen(
-                        currentuserEmail: _email.text,
-                      ),
-                    ),
-                  );
-                } else if (userType == 'user') {
-                  // Navigate to HomeScreen
-                  print('Login As User');
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => HomePage(
-                        currentUserEmail: _email.text,
-                        requiresProfileSetup: true,
-                      ),
-                    ),
-                  );
-                } else {
-                  print("Invalid UserType");
-                }
-              });
-
-              // Show a success SnackBar
-              final snackBar = SnackBar(content: Text('Login Successful'));
-              ScaffoldMessenger.of(context).showSnackBar(snackBar);
-            } else {
-              print("Login Failed");
-              setState(() {
-                isloading = false;
-              });
-
-              // Show a failure SnackBar
-              final snackBar = SnackBar(
-                content: Text('Login Failed. Check Email/Password.'),
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                content: Row(
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(width: 20),
+                    Text("Please wait..."),
+                  ],
+                ),
               );
-              ScaffoldMessenger.of(context).showSnackBar(snackBar);
-            }
-          });
-        }
-      } else {
-        print("Please fill the form correctly!");
-      }
-    },
-    child: Container(
-      height: size.height / 14,
-      width: size.width / 1.2,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: Color.fromARGB(255, 76, 175, 142),
-      ),
-      alignment: Alignment.center,
-      child: isloading
-          ? CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-            )
-          : Text(
-              "LOG IN ",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-    ),
-  );
-}
+            },
+          );
 
+          final status = await checkUserStatus(_email.text);
+
+          Navigator.pop(context); // Close the AlertDialog
+
+          if (status == 'Blocked') {
+            setState(() {
+              isloading = false;
+            });
+
+            // Show a blocked SnackBar
+            final snackBar = SnackBar(content: Text('You are blocked'));
+            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          } else {
+            // Proceed with login
+            Login(_email.text, _password.text).then((user) {
+              if (user != null) {
+                print("Login Successful");
+                setState(() {
+                  isloading = false;
+                });
+
+                getUserType(user.uid).then((String? userType) {
+                  if (userType == 'admin') {
+                    // Navigate to AdminScreen
+                    print('Login As Admin');
+
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => AdminHomeScreen(
+                          currentuserEmail: _email.text,
+                        ),
+                      ),
+                    );
+                  } else if (userType == 'user') {
+                    // Navigate to HomeScreen
+                    print('Login As User');
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => HomePage(
+                          currentUserEmail: _email.text,
+                          requiresProfileSetup: true,
+                        ),
+                      ),
+                    );
+                  } else {
+                    print("Invalid UserType");
+                  }
+                });
+
+                // Show a success SnackBar
+                final snackBar = SnackBar(content: Text('Login Successful'));
+                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+              } else {
+                print("Login Failed");
+                setState(() {
+                  isloading = false;
+                });
+
+                // Show a failure SnackBar
+                final snackBar = SnackBar(
+                  content: Text('Login Failed. Check Email/Password.'),
+                );
+                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+              }
+            });
+          }
+        } else {
+          print("Please fill the form correctly!");
+        }
+      },
+      child: Container(
+        height: size.height / 14,
+        width: size.width / 1.2,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: Color.fromARGB(255, 76, 175, 142),
+        ),
+        alignment: Alignment.center,
+        child: isloading
+            ? CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              )
+            : Text(
+                "LOG IN ",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+      ),
+    );
+  }
 
   Widget field(
       Size size, String hintText, IconData icon, TextEditingController cont) {
