@@ -11,7 +11,8 @@ import '../view/Profile_Screen.dart';
 
 class UsersList extends StatefulWidget {
   final String currentUserEmail;
-  const UsersList({Key? key, required this.currentUserEmail}) : super(key: key);
+  const UsersList({Key? key, required this.currentUserEmail})
+      : super(key: key);
 
   @override
   _UsersListState createState() => _UsersListState();
@@ -27,12 +28,16 @@ class _UsersListState extends State<UsersList> with WidgetsBindingObserver {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
+
+  
+
   @override
   void initState() {
     super.initState();
     _usersStream = FirebaseFirestore.instance.collection('users').snapshots();
     WidgetsBinding.instance.addObserver(this);
     setStatus("Online");
+
 
     Future.delayed(Duration(seconds: 1), () {
       setState(() {
@@ -121,31 +126,34 @@ class _UsersListState extends State<UsersList> with WidgetsBindingObserver {
     );
   }
 
-  void blockUser(DocumentSnapshot user) async {
-    await _firestore
-        .collection('users')
-        .doc(user.id)
-        .update({"status": "Blocked"});
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('User blocked')),
-    );
-  }
 
-  void unblockUser(DocumentSnapshot user) async {
-    await _firestore
-        .collection('users')
-        .doc(user.id)
-        .update({"status": "Online"});
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('User unblocked')),
-    );
-  }
+  void blockUser(DocumentSnapshot user) async {
+  await _firestore
+      .collection('users')
+      .doc(user.id)
+      .update({"status": "Blocked"});
+   ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text('User blocked')),
+  );
+}
+
+void unblockUser(DocumentSnapshot user) async {
+  await _firestore
+      .collection('users')
+      .doc(user.id)
+      .update({"status": "Online"});
+        ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text('User unblocked')),
+  );
+
+}
+
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+       final size = MediaQuery.of(context).size;
     return Scaffold(
-      key: _scaffoldKey,
+        key: _scaffoldKey,
       backgroundColor: Color.fromARGB(255, 249, 250, 251),
       appBar: AppBar(
         toolbarHeight: 80,
@@ -163,8 +171,7 @@ class _UsersListState extends State<UsersList> with WidgetsBindingObserver {
                 MaterialPageRoute(
                     builder: (_) => AdminHomeScreen(
                           currentuserEmail: widget.currentUserEmail,
-                        )));
-          },
+                        )));          },
         ),
         title: Container(
           decoration: BoxDecoration(
@@ -188,108 +195,107 @@ class _UsersListState extends State<UsersList> with WidgetsBindingObserver {
           ),
         ),
       ),
-      body: isLoading
-          ? ShimmerEffect()
-          : Column(
-              children: [
-                SizedBox(height: 20),
-                Expanded(
-                  child: StreamBuilder<QuerySnapshot>(
-                    stream: _usersStream,
-                    builder: (BuildContext context,
-                        AsyncSnapshot<QuerySnapshot> snapshot) {
-                      if (snapshot.hasError) {
-                        return Text('Error: ${snapshot.error}');
-                      }
+      body:isLoading? ShimmerEffect(): Column(
+        children: [
+          SizedBox(height: 20),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: _usersStream,
+              builder: (BuildContext context,
+                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                }
 
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      }
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
 
-                      _usersList = snapshot.data!.docs;
+                _usersList = snapshot.data!.docs;
 
-                      _usersList.removeWhere(
-                          (user) => user['email'] == widget.currentUserEmail);
+                _usersList.removeWhere(
+                    (user) => user['email'] == widget.currentUserEmail);
 
-                      if (_searchController.text.isNotEmpty) {
-                        _usersList = _usersList
-                            .where((user) => user['name']
-                                .toLowerCase()
-                                .contains(_searchController.text.toLowerCase()))
-                            .toList();
-                      }
-                      return ListView.builder(
-                        itemCount: _usersList.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          final user = _usersList[index];
-                          final userName = user['name'];
-                          final userEmail = user['email'];
-                          final imageUrl = user['imageUrl'];
-                          final userType = user['userType'];
-                          final userStatus = user['status'];
-                          final userId = user['uid'];
+                if (_searchController.text.isNotEmpty) {
+                  _usersList = _usersList
+                      .where((user) => user['name']
+                          .toLowerCase()
+                          .contains(_searchController.text.toLowerCase()))
+                      .toList();
+                }
+                return ListView.builder(
+  itemCount: _usersList.length,
+  itemBuilder: (BuildContext context, int index) {
+    final user = _usersList[index];
+    final userName = user['name'];
+    final userEmail = user['email'];
+    final imageUrl = user['imageUrl'];
+    final userType = user['userType'];
+    final userStatus = user['status'];
+    final userId=user['uid'];
 
-                          return Padding(
-                            padding: EdgeInsets.symmetric(
-                              vertical: 8.0,
-                              horizontal: 16.0,
-                            ),
-                            child: Card(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              child: ListTile(
-                                onTap: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => ProfileScreen(
-                                              useremail: userId)));
-                                },
-                                leading: CircleAvatar(
-                                  backgroundImage: NetworkImage(imageUrl),
-                                ),
-                                title: userType == 'admin'
-                                    ? Text(userName + '(Admin)')
-                                    : Text(userName),
-                                subtitle: Text(userEmail),
-                                trailing: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    IconButton(
-                                      onPressed: () => openChatRoom(user),
-                                      icon: Icon(Icons.chat),
-                                    ),
-                                    IconButton(
-                                      onPressed: () {
-                                        if (userStatus == "Blocked") {
-                                          unblockUser(user);
-                                        } else {
-                                          blockUser(user);
-                                        }
-                                      },
-                                      icon: Icon(userStatus == "Blocked"
-                                          ? Icons.check_circle
-                                          : Icons.block),
-                                    ),
-                                    IconButton(
-                                      onPressed: () {},
-                                      icon: Icon(Icons.payment),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        vertical: 8.0,
+        horizontal: 16.0,
+      ),
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        child: ListTile(
+          onTap: (){
+               Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              ProfileScreen(useremail: userId)));
+          },
+          leading: CircleAvatar(
+            backgroundImage: NetworkImage(imageUrl),
+          ),
+          title: userType == 'admin'
+              ? Text(userName + '(Admin)')
+              : Text(userName),
+          subtitle: Text(userEmail),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                onPressed: () => openChatRoom(user),
+                icon: Icon(Icons.chat),
+              ),
+              IconButton(
+                onPressed: () {
+                  if (userStatus == "Blocked") {
+                    unblockUser(user);
+                  } else {
+                    blockUser(user);
+                  }
+                },
+                icon: Icon(userStatus == "Blocked"
+                    ? Icons.check_circle
+                    : Icons.block),
+              ),
+              IconButton(
+                onPressed: () {},
+                icon: Icon(Icons.payment),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  },
+);
+
+              },
             ),
+          ),
+        ],
+      ),
     );
   }
 }

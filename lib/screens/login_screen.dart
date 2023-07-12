@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:vuna__gigs/screens/forgot_password.dart';
 import 'package:vuna__gigs/screens/signup_screen.dart';
 import 'package:vuna__gigs/admin/AdminHomesScreen.dart';
 
@@ -19,6 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
   bool isloading = false;
+  bool _obscurePassword = true;
 
   Future<String?> checkUserStatus(String email) async {
     final snapshot = await FirebaseFirestore.instance
@@ -101,7 +103,30 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Container(
                       width: size.width,
                       alignment: Alignment.center,
-                      child: field(size, "Password", Icons.lock, _password),
+                      child: Stack(
+                        alignment: Alignment.centerRight,
+                        children: [
+                          field(
+                            size,
+                            "Password",
+                            Icons.lock,
+                            _password,
+                            obscureText: _obscurePassword,
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
 
@@ -112,7 +137,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       alignment: Alignment.centerRight,
                       child: GestureDetector(
                         onTap: () => Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(builder: (_) => CreateAccount())),
+                            MaterialPageRoute(builder: (_) => ForgotPasswordPage())),
                         child: Text(
                           "Forget Password?",
                           style: TextStyle(
@@ -183,6 +208,11 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
     );
+  }
+
+  void _clearFields() {
+    // _email.clear();
+    _password.clear();
   }
 
   Widget customButton(Size size) {
@@ -263,6 +293,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 // Show a success SnackBar
                 final snackBar = SnackBar(content: Text('Login Successful'));
                 ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+                _clearFields();
               } else {
                 print("Login Failed");
                 setState(() {
@@ -306,12 +338,14 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget field(
-      Size size, String hintText, IconData icon, TextEditingController cont) {
+      Size size, String hintText, IconData icon, TextEditingController cont,
+      {bool obscureText = false}) {
     return Container(
       height: size.height / 15,
       width: size.width / 1.3,
       child: TextField(
         controller: cont,
+        obscureText: obscureText,
         decoration: InputDecoration(
           prefixIcon: Icon(icon),
           hintText: hintText,
@@ -322,3 +356,8 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
+
+
+
+
+

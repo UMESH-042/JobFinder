@@ -17,7 +17,7 @@ class NotificationsService {
     await _flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
-  void sendNotification(String title, String body) async {
+  void sendNoti(String title, String body) async {
     AndroidNotificationDetails androidNotificationDetails =
         AndroidNotificationDetails(
       'channelId',
@@ -34,6 +34,9 @@ class NotificationsService {
         0, title, body, notificationDetails);
   }
 }
+
+
+
 
 class LocalNotificationService {
   static final FlutterLocalNotificationsPlugin

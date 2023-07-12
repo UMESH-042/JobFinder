@@ -57,6 +57,8 @@ dependencies:
   http: ^1.1.0
   shimmer: ^3.0.0
   permission_handler: ^10.4.2
+  google_sign_in: ^6.1.4
+  font_awesome_flutter: ^10.5.0
 
 
 
