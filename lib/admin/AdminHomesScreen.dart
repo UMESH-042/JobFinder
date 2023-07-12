@@ -339,6 +339,7 @@ class _NotificationFormState extends State<NotificationForm> {
         ),
         SizedBox(height: 10),
         ElevatedButton(
+
           onPressed: () {
             final title = _titleController.text;
             final body = _bodyController.text;
@@ -347,6 +348,7 @@ class _NotificationFormState extends State<NotificationForm> {
             _bodyController.clear();
           },
           child: Text('Send'),
+          style: ButtonStyle(minimumSize: MaterialStateProperty.all<Size>(Size(double.infinity,50))),
         ),
       ],
     );
