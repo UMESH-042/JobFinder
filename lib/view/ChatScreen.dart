@@ -32,7 +32,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
     setStatus("Online");
 
 
-    Future.delayed(Duration(seconds: 2), () {
+    Future.delayed(Duration(seconds: 1), () {
       setState(() {
         isLoading = false;
       });
@@ -118,6 +118,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
       ),
     );
   }
+
 
   @override
   Widget build(BuildContext context) {

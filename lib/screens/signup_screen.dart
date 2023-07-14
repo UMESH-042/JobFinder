@@ -434,7 +434,7 @@ class _CreateAccountState extends State<CreateAccount> {
 
   void _clearFields() {
     _name.clear();
-    _email.clear();
+    // _email.clear();
     _password.clear();
   }
 
