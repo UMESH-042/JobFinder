@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class JobDetailsPage extends StatefulWidget {
+   final String documentId; // Add document ID parameter
   final String location;
   final String salary;
   final String category;
@@ -12,6 +13,7 @@ class JobDetailsPage extends StatefulWidget {
   final String description;
   final String requirements;
   final String postedby;
+  final int noOfApplicants;
 
   const JobDetailsPage({
     required this.location,
@@ -22,6 +24,7 @@ class JobDetailsPage extends StatefulWidget {
     required this.description,
     required this.requirements,
     required this.postedby,
+    required this.noOfApplicants, required this.documentId,
   });
 
   @override
@@ -30,6 +33,13 @@ class JobDetailsPage extends StatefulWidget {
 
 class _JobDetailsPageState extends State<JobDetailsPage> {
   bool _isLoading = false;
+  int _currentApplicants = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentApplicants = widget.noOfApplicants;
+  }
 
   String ChatRoomId(String user1, String user2) {
     if (user1[0].toLowerCase().codeUnits[0] >
@@ -42,6 +52,13 @@ class _JobDetailsPageState extends State<JobDetailsPage> {
 
   Future<void> sendMessageToPostedByUser(String currentUserEmail) async {
     try {
+
+
+      final DocumentReference jobDetailsRef =
+          FirebaseFirestore.instance.collection('jobs').doc(widget.documentId);
+
+      await jobDetailsRef.update({'noOfApplicants': FieldValue.increment(1)});
+
       final FirebaseAuth _auth = FirebaseAuth.instance;
       final CollectionReference chatroomCollection =
           FirebaseFirestore.instance.collection('chatroom');
@@ -49,7 +66,17 @@ class _JobDetailsPageState extends State<JobDetailsPage> {
       final chatRoomId = ChatRoomId(currentUserEmail, widget.postedby);
 
       final chatRoomSnapshot = await chatroomCollection.doc(chatRoomId).get();
-      if (!chatRoomSnapshot.exists) {
+    //     if (chatRoomSnapshot.exists) {
+    //   // Display snackbar message and return if already applied
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(
+    //       content: Text('You have already applied for this job'),
+    //       backgroundColor: Colors.red,
+    //     ),
+    //   );
+    //   return;
+    // }
+if (!chatRoomSnapshot.exists) {
         final Map<String, dynamic> chatRoomData = {
           'users': [widget.postedby, currentUserEmail],
           'createdAt': FieldValue.serverTimestamp(),
@@ -66,6 +93,7 @@ class _JobDetailsPageState extends State<JobDetailsPage> {
       };
 
       await chatRoomRef.collection('chats').add(messageData);
+
 
       print('Message sent successfully!');
     } catch (e) {
@@ -88,6 +116,9 @@ class _JobDetailsPageState extends State<JobDetailsPage> {
               backgroundColor: Colors.green,
             ),
           );
+          setState(() {
+            _currentApplicants++; // Increase the value by one
+          });
           Navigator.pop(context);
         }).catchError((error) {
           ScaffoldMessenger.of(context).showSnackBar(

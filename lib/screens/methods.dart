@@ -57,50 +57,7 @@ Future<User?> Login(String email, String password) async {
   }
 }
 
-// Future<User?> login(String email, String password) async {
-//   FirebaseAuth _auth = FirebaseAuth.instance;
-//   FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-//   try {
-//     User? user = (await _auth.signInWithEmailAndPassword(
-//       email: email,
-//       password: password,
-//     ))
-//         .user;
-
-//     if (user != null) {
-//       DocumentSnapshot snapshot = await _firestore
-//           .collection('users')
-//           .doc(user.uid)
-//           .get();
-
-//       if (snapshot.exists) {
-//         Map<String, dynamic> userData = snapshot.data() as Map<String, dynamic>;
-//         String userType = userData['UserType'];
-
-//         if (userType == 'admin') {
-//           print("Admin Login Successful");
-//           return user;
-//         } else if (userType == 'user') {
-//           print("User Login Successful");
-//           return user;
-//         } else {
-//           print("Invalid UserType");
-//           return null;
-//         }
-//       } else {
-//         print("User data not found");
-//         return null;
-//       }
-//     } else {
-//       print("Login Failed");
-//       return null;
-//     }
-//   } catch (e) {
-//     print(e);
-//     return null;
-//   }
-// }
 
 Future logOut(BuildContext context) async {
   FirebaseAuth _auth = FirebaseAuth.instance;

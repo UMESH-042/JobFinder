@@ -431,82 +431,6 @@ class _AddJobsState extends State<AddJobs> {
     );
   }
 
-  // Widget button() {
-  //   return InkWell(
-  //     onTap: () async {
-  //       if (_locationController.text.isNotEmpty &&
-  //           _salaryController.text.isNotEmpty &&
-  //           _categoryController.text.isNotEmpty &&
-  //           _subcategoryController.text.isNotEmpty && _descriptionController.text.isNotEmpty && _requirementsController.text.isNotEmpty &&
-  //           jobtype.isNotEmpty &&
-  //           imageXfile != null) {
-  //         setState(() {
-  //           _isAddingJob = true;
-  //         });
-
-  //         await uploadImage();
-
-  //         FirebaseFirestore.instance.collection("jobs").add({
-  //           "location": _locationController.text,
-  //           "salary": _salaryController.text,
-  //           "category": _categoryController.text,
-  //           "subcategory": _subcategoryController.text,
-  //           "description":_descriptionController.text,
-  //           "requirements":_requirementsController.text,
-  //           "jobtype": jobtype,
-  //           "image": bookImageUrl,
-  //           "postedby":widget.otherUserEmail,
-  //         }).then((value) {
-  //           setState(() {
-  //             _isAddingJob = false;
-  //           });
-
-  //           ScaffoldMessenger.of(context).showSnackBar(
-  //             SnackBar(
-  //               content: Text("Job Added Successfully"),
-  //             ),
-  //           );
-
-  //           Navigator.pop(context);
-  //         }).catchError((error) {
-  //           setState(() {
-  //             _isAddingJob = false;
-  //           });
-
-  //           ScaffoldMessenger.of(context).showSnackBar(
-  //             SnackBar(
-  //               content: Text("Failed to add job. Please try again."),
-  //             ),
-  //           );
-  //         });
-  //       } else {
-  //         ScaffoldMessenger.of(context).showSnackBar(
-  //           SnackBar(
-  //             content: Text("Please fill all the required fields"),
-  //           ),
-  //         );
-  //       }
-  //     },
-  //     child: Container(
-  //       width: MediaQuery.of(context).size.width,
-  //       height: 55,
-  //       decoration: BoxDecoration(
-  //         color: Color.fromARGB(255, 76, 175, 142),
-  //         borderRadius: BorderRadius.circular(15),
-  //       ),
-  //       child: Center(
-  //         child: Text(
-  //           "Add Job",
-  //           style: TextStyle(
-  //             color: Colors.white,
-  //             fontWeight: FontWeight.bold,
-  //             fontSize: 17,
-  //           ),
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
   Widget button() {
   return InkWell(
     onTap: () async {
@@ -543,6 +467,7 @@ class _AddJobsState extends State<AddJobs> {
             "jobtype": jobtype,
             "image": bookImageUrl,
             "postedby": widget.otherUserEmail,
+             "NoOfApplicants": 0,
           }).then((value) {
             setState(() {
               _isAddingJob = false;

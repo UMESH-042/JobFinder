@@ -212,6 +212,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
 //     print("Error: $e");
 //   }
 // }
+
 sendNotification(String userName, String message, String token) async {
   final data = {
     'click_action': 'FLUTTER_NOTIFICATION_CLICK',
