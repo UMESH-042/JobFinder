@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class JobDetailsPage extends StatefulWidget {
-   final String documentId; // Add document ID parameter
+  final String documentId; // Add document ID parameter
   final String location;
   final String salary;
   final String category;
@@ -14,6 +14,7 @@ class JobDetailsPage extends StatefulWidget {
   final String requirements;
   final String postedby;
   final int noOfApplicants;
+  final String CompanyName;
 
   const JobDetailsPage({
     required this.location,
@@ -24,7 +25,8 @@ class JobDetailsPage extends StatefulWidget {
     required this.description,
     required this.requirements,
     required this.postedby,
-    required this.noOfApplicants, required this.documentId,
+    required this.noOfApplicants,
+    required this.documentId, required this.CompanyName,
   });
 
   @override
@@ -52,12 +54,10 @@ class _JobDetailsPageState extends State<JobDetailsPage> {
 
   Future<void> sendMessageToPostedByUser(String currentUserEmail) async {
     try {
-
-
       final DocumentReference jobDetailsRef =
           FirebaseFirestore.instance.collection('jobs').doc(widget.documentId);
 
-      await jobDetailsRef.update({'noOfApplicants': FieldValue.increment(1)});
+      await jobDetailsRef.update({'NoOfApplicants': FieldValue.increment(1)});
 
       final FirebaseAuth _auth = FirebaseAuth.instance;
       final CollectionReference chatroomCollection =
@@ -66,17 +66,17 @@ class _JobDetailsPageState extends State<JobDetailsPage> {
       final chatRoomId = ChatRoomId(currentUserEmail, widget.postedby);
 
       final chatRoomSnapshot = await chatroomCollection.doc(chatRoomId).get();
-    //     if (chatRoomSnapshot.exists) {
-    //   // Display snackbar message and return if already applied
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     SnackBar(
-    //       content: Text('You have already applied for this job'),
-    //       backgroundColor: Colors.red,
-    //     ),
-    //   );
-    //   return;
-    // }
-if (!chatRoomSnapshot.exists) {
+      //     if (chatRoomSnapshot.exists) {
+      //   // Display snackbar message and return if already applied
+      //   ScaffoldMessenger.of(context).showSnackBar(
+      //     SnackBar(
+      //       content: Text('You have already applied for this job'),
+      //       backgroundColor: Colors.red,
+      //     ),
+      //   );
+      //   return;
+      // }
+      if (!chatRoomSnapshot.exists) {
         final Map<String, dynamic> chatRoomData = {
           'users': [widget.postedby, currentUserEmail],
           'createdAt': FieldValue.serverTimestamp(),
@@ -88,12 +88,11 @@ if (!chatRoomSnapshot.exists) {
 
       final Map<String, dynamic> messageData = {
         'sendBy': _auth.currentUser?.displayName,
-        'message': 'I am interested in the job.',
+        'message': 'I am interested in your Company ${widget.CompanyName} to work as ${widget.category} and I am willing to work ${widget.jobtype}',
         'time': FieldValue.serverTimestamp(),
       };
 
       await chatRoomRef.collection('chats').add(messageData);
-
 
       print('Message sent successfully!');
     } catch (e) {
@@ -196,6 +195,22 @@ if (!chatRoomSnapshot.exists) {
                     widget.jobtype,
                     style: TextStyle(
                       fontSize: 18,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'Company Name',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    widget.CompanyName,
+                    style: TextStyle(
+                      fontSize: 16,
                       color: Colors.grey[600],
                     ),
                   ),

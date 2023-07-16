@@ -25,6 +25,8 @@ class _AddJobsState extends State<AddJobs> {
   TextEditingController _subcategoryController = TextEditingController();
   TextEditingController _descriptionController = TextEditingController();
   TextEditingController _requirementsController = TextEditingController();
+  TextEditingController _companyNameController = TextEditingController();
+
   String jobtype = "";
 
   List<String> availableJobTypes = [
@@ -141,7 +143,15 @@ class _AddJobsState extends State<AddJobs> {
                         ],
                       ),
                       const SizedBox(
-                        height: 30,
+                        height: 20,
+                      ),
+                      label("Company Name"),
+                      const SizedBox(
+                        height: 12,
+                      ),
+                      CompanyName(),
+                      const SizedBox(
+                        height: 20,
                       ),
                       label("Category"),
                       const SizedBox(
@@ -431,94 +441,118 @@ class _AddJobsState extends State<AddJobs> {
     );
   }
 
-  Widget button() {
-  return InkWell(
-    onTap: () async {
-      if (_locationController.text.isNotEmpty &&
-          _salaryController.text.isNotEmpty &&
-          _categoryController.text.isNotEmpty &&
-          _subcategoryController.text.isNotEmpty &&
-          _descriptionController.text.isNotEmpty &&
-          _requirementsController.text.isNotEmpty &&
-          jobtype.isNotEmpty &&
-          imageXfile != null) {
-        // Redirect to payment page
-        final paymentResult = await Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => PaymentPage(),
-          ),
-        );
-        if (paymentResult == true) {
-          // Payment successful, proceed with adding the job
-          setState(() {
-            _isAddingJob = true;
-          });
-
-          await uploadImage();
-
-          FirebaseFirestore.instance.collection("jobs").add({
-            "location": _locationController.text,
-            "salary": _salaryController.text,
-            "category": _categoryController.text,
-            "subcategory": _subcategoryController.text,
-            "description": _descriptionController.text,
-            "requirements": _requirementsController.text,
-            "jobtype": jobtype,
-            "image": bookImageUrl,
-            "postedby": widget.otherUserEmail,
-             "NoOfApplicants": 0,
-          }).then((value) {
-            setState(() {
-              _isAddingJob = false;
-            });
-
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text("Job Added Successfully"),
-              ),
-            );
-
-            Navigator.pop(context);
-          }).catchError((error) {
-            setState(() {
-              _isAddingJob = false;
-            });
-
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text("Failed to add job. Please try again."),
-              ),
-            );
-          });
-        }
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Please fill all the required fields"),
-          ),
-        );
-      }
-    },
-    child: Container(
-      width: MediaQuery.of(context).size.width,
+  Widget CompanyName() {
+    return Container(
       height: 55,
+      width: MediaQuery.of(context).size.width,
       decoration: BoxDecoration(
-        color: Color.fromARGB(255, 76, 175, 142),
+        color: Color.fromARGB(255, 56, 47, 47),
         borderRadius: BorderRadius.circular(15),
       ),
-      child: Center(
-        child: Text(
-          "Add Job",
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 17,
+      child: TextFormField(
+        controller: _companyNameController,
+        style: const TextStyle(
+          color: Colors.white70,
+          fontSize: 17,
+        ),
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          hintText: "Company Name",
+          hintStyle: TextStyle(color: Colors.grey[500], fontSize: 17),
+          contentPadding: EdgeInsets.only(left: 20, right: 20),
+        ),
+      ),
+    );
+  }
+
+  Widget button() {
+    return InkWell(
+      onTap: () async {
+        if (_locationController.text.isNotEmpty &&
+            _salaryController.text.isNotEmpty &&
+            _categoryController.text.isNotEmpty &&
+            _subcategoryController.text.isNotEmpty &&
+            _descriptionController.text.isNotEmpty &&
+            _requirementsController.text.isNotEmpty &&
+            jobtype.isNotEmpty &&
+            imageXfile != null) {
+          // Redirect to payment page
+          final paymentResult = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PaymentPage(),
+            ),
+          );
+          if (paymentResult == true) {
+            // Payment successful, proceed with adding the job
+            setState(() {
+              _isAddingJob = true;
+            });
+
+            await uploadImage();
+
+            FirebaseFirestore.instance.collection("jobs").add({
+              "location": _locationController.text,
+              "salary": _salaryController.text,
+              "category": _categoryController.text,
+              "subcategory": _subcategoryController.text,
+              "description": _descriptionController.text,
+              "requirements": _requirementsController.text,
+              "jobtype": jobtype,
+              "image": bookImageUrl,
+              "postedby": widget.otherUserEmail,
+              "NoOfApplicants": 0,
+              "companyDetails":_companyNameController.text,
+            }).then((value) {
+              setState(() {
+                _isAddingJob = false;
+              });
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text("Job Added Successfully"),
+                ),
+              );
+
+              Navigator.pop(context);
+            }).catchError((error) {
+              setState(() {
+                _isAddingJob = false;
+              });
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text("Failed to add job. Please try again."),
+                ),
+              );
+            });
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Please fill all the required fields"),
+            ),
+          );
+        }
+      },
+      child: Container(
+        width: MediaQuery.of(context).size.width,
+        height: 55,
+        decoration: BoxDecoration(
+          color: Color.fromARGB(255, 76, 175, 142),
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: Center(
+          child: Text(
+            "Add Job",
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 17,
+            ),
           ),
         ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 }

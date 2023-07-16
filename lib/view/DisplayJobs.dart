@@ -14,209 +14,208 @@ class _JobListPageState extends State<JobListPage> {
   String filterJobType = '';
   String filterLocation = '';
 
-
   void _showFilterBottomSheet(BuildContext context) {
-  showModalBottomSheet(
-    context: context,
-    builder: (context) {
-      String selectedFilter = filterCategory;
-      String selectedJobType = filterJobType;
-      String selectedLocation = filterLocation;
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        String selectedFilter = filterCategory;
+        String selectedJobType = filterJobType;
+        String selectedLocation = filterLocation;
 
-      bool showFilterCategory = selectedFilter.isNotEmpty;
-      bool showFilterJobType = selectedJobType.isNotEmpty;
-      bool showFilterLocation = selectedLocation.isNotEmpty;
+        bool showFilterCategory = selectedFilter.isNotEmpty;
+        bool showFilterJobType = selectedJobType.isNotEmpty;
+        bool showFilterLocation = selectedLocation.isNotEmpty;
 
-      return SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Select a Category',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+        return SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Select a Category',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              SizedBox(height: 8),
-              DropdownButton<String>(
-                value: selectedFilter,
-                isExpanded: true,
-                underline: Container(
-                  height: 1,
-                  color: Colors.grey[400],
-                ),
-                items: [
-                  DropdownMenuItem(
-                    value: '',
-                    child: Text('All'),
+                SizedBox(height: 8),
+                DropdownButton<String>(
+                  value: selectedFilter,
+                  isExpanded: true,
+                  underline: Container(
+                    height: 1,
+                    color: Colors.grey[400],
                   ),
-                  DropdownMenuItem(
-                    value: 'SDE',
-                    child: Text('SDE'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'UI/UX Designer',
-                    child: Text('UI/UX Designer'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'Lead Product Manager',
-                    child: Text('Lead Product Manager'),
-                  ),
-                ],
-                onChanged: (value) {
-                  setState(() {
-                    selectedFilter = value!;
-                    filterCategory = value!;
-                    showFilterCategory = true;
-                  });
-                },
-              ),
-              SizedBox(height: 16),
-              Text(
-                'Job Type',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 8),
-              DropdownButton<String>(
-                value: selectedJobType,
-                isExpanded: true,
-                underline: Container(
-                  height: 1,
-                  color: Colors.grey[400],
-                ),
-                items: [
-                  DropdownMenuItem(
-                    value: '',
-                    child: Text('All'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'Full Time',
-                    child: Text('Full Time'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'Part Time',
-                    child: Text('Part Time'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'Freelance',
-                    child: Text('Freelance'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'Remote',
-                    child: Text('Remote'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'Contract',
-                    child: Text('Contract'),
-                  ),
-                ],
-                onChanged: (value) {
-                  setState(() {
-                    selectedJobType = value!;
-                    filterJobType = value!;
-                    showFilterJobType = true;
-                  });
-                },
-              ),
-              SizedBox(height: 16),
-              Text(
-                'Location',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 8),
-              TextField(
-                onChanged: (value) {
-                  setState(() {
-                    selectedLocation = value;
-                    filterLocation = value;
-                    showFilterLocation = true;
-                  });
-                },
-                decoration: InputDecoration(
-                  hintText: 'Enter location',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              SizedBox(height: 16),
-              Wrap(
-                spacing: 8,
-                children: [
-                  Visibility(
-                    visible: showFilterCategory,
-                    maintainState: true,
-                    maintainAnimation: true,
-                    maintainSize: true,
-                    child: Chip(
-                      label: Text(selectedFilter),
-                      deleteIcon: Icon(Icons.cancel),
-                      onDeleted: () {
-                        setState(() {
-                          selectedFilter = '';
-                          filterCategory = '';
-                          showFilterCategory = false;
-                        });
-                      },
+                  items: [
+                    DropdownMenuItem(
+                      value: '',
+                      child: Text('All'),
                     ),
-                  ),
-                  Visibility(
-                    visible: showFilterJobType,
-                    maintainState: true,
-                    maintainAnimation: true,
-                    maintainSize: true,
-                    child: Chip(
-                      label: Text(selectedJobType),
-                      deleteIcon: Icon(Icons.cancel),
-                      onDeleted: () {
-                        setState(() {
-                          selectedJobType = '';
-                          filterJobType = '';
-                          showFilterJobType = false;
-                        });
-                      },
+                    DropdownMenuItem(
+                      value: 'SDE',
+                      child: Text('SDE'),
                     ),
-                  ),
-                  Visibility(
-                    visible: showFilterLocation,
-                    maintainState: true,
-                    maintainAnimation: true,
-                    maintainSize: true,
-                    child: Chip(
-                      label: Text(selectedLocation),
-                      deleteIcon: Icon(Icons.cancel),
-                      onDeleted: () {
-                        setState(() {
-                          selectedLocation = '';
-                          filterLocation = '';
-                          showFilterLocation = false;
-                        });
-                      },
+                    DropdownMenuItem(
+                      value: 'UI/UX Designer',
+                      child: Text('UI/UX Designer'),
                     ),
+                    DropdownMenuItem(
+                      value: 'Lead Product Manager',
+                      child: Text('Lead Product Manager'),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      selectedFilter = value!;
+                      filterCategory = value!;
+                      showFilterCategory = true;
+                    });
+                  },
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'Job Type',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
                   ),
-                ],
-              ),
-              SizedBox(height: 8),
-              button(context),
-            ],
+                ),
+                SizedBox(height: 8),
+                DropdownButton<String>(
+                  value: selectedJobType,
+                  isExpanded: true,
+                  underline: Container(
+                    height: 1,
+                    color: Colors.grey[400],
+                  ),
+                  items: [
+                    DropdownMenuItem(
+                      value: '',
+                      child: Text('All'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Full Time',
+                      child: Text('Full Time'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Part Time',
+                      child: Text('Part Time'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Freelance',
+                      child: Text('Freelance'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Remote',
+                      child: Text('Remote'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Contract',
+                      child: Text('Contract'),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      selectedJobType = value!;
+                      filterJobType = value!;
+                      showFilterJobType = true;
+                    });
+                  },
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'Location',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 8),
+                TextField(
+                  onChanged: (value) {
+                    setState(() {
+                      selectedLocation = value;
+                      filterLocation = value;
+                      showFilterLocation = true;
+                    });
+                  },
+                  decoration: InputDecoration(
+                    hintText: 'Enter location',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                SizedBox(height: 16),
+                Wrap(
+                  spacing: 8,
+                  children: [
+                    Visibility(
+                      visible: showFilterCategory,
+                      maintainState: true,
+                      maintainAnimation: true,
+                      maintainSize: true,
+                      child: Chip(
+                        label: Text(selectedFilter),
+                        deleteIcon: Icon(Icons.cancel),
+                        onDeleted: () {
+                          setState(() {
+                            selectedFilter = '';
+                            filterCategory = '';
+                            showFilterCategory = false;
+                          });
+                        },
+                      ),
+                    ),
+                    Visibility(
+                      visible: showFilterJobType,
+                      maintainState: true,
+                      maintainAnimation: true,
+                      maintainSize: true,
+                      child: Chip(
+                        label: Text(selectedJobType),
+                        deleteIcon: Icon(Icons.cancel),
+                        onDeleted: () {
+                          setState(() {
+                            selectedJobType = '';
+                            filterJobType = '';
+                            showFilterJobType = false;
+                          });
+                        },
+                      ),
+                    ),
+                    Visibility(
+                      visible: showFilterLocation,
+                      maintainState: true,
+                      maintainAnimation: true,
+                      maintainSize: true,
+                      child: Chip(
+                        label: Text(selectedLocation),
+                        deleteIcon: Icon(Icons.cancel),
+                        onDeleted: () {
+                          setState(() {
+                            selectedLocation = '';
+                            filterLocation = '';
+                            showFilterLocation = false;
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8),
+                button(context),
+              ],
+            ),
           ),
-        ),
-      );
-    },
-  );
-}
+        );
+      },
+    );
+  }
 
-Widget button(BuildContext context) {
+  Widget button(BuildContext context) {
     return InkWell(
       onTap: () {
-Navigator.pop(context);
+        Navigator.pop(context);
       },
       child: Container(
         margin: EdgeInsets.all(20),
@@ -227,101 +226,100 @@ Navigator.pop(context);
           borderRadius: BorderRadius.circular(15),
         ),
         child: Center(
-          child:
-              Text(
-                  "Apply Filter",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 17,
-                  ),
-                ),
+          child: Text(
+            "Apply Filter",
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 17,
+            ),
+          ),
         ),
       ),
     );
   }
-  
-@override
-Widget build(BuildContext context) {
-  return Scaffold(
-    body: StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('jobs').snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return Center(
-            child: Text('Error: ${snapshot.error}'),
-          );
-        }
 
-        if (!snapshot.hasData) {
-          return Center(
-            child: CircularProgressIndicator(),
-          );
-        }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance.collection('jobs').snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Center(
+              child: Text('Error: ${snapshot.error}'),
+            );
+          }
 
-        final jobDocs = snapshot.data!.docs;
+          if (!snapshot.hasData) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
 
-        final filteredJobs = jobDocs.where(
-          (job) {
-            final jobData = job.data() as Map<String, dynamic>?;
+          final jobDocs = snapshot.data!.docs;
 
-            if (jobData == null) {
+          final filteredJobs = jobDocs.where(
+            (job) {
+              final jobData = job.data() as Map<String, dynamic>?;
+
+              if (jobData == null) {
+                return false;
+              }
+
+              final category = jobData['category']?.toString().toLowerCase();
+              final jobType = jobData['jobtype']?.toString().toLowerCase();
+              final location = jobData['location']?.toString().toLowerCase();
+              final searchLower = searchQuery.toLowerCase();
+              final filterCategoryLower = filterCategory.toLowerCase();
+              final filterJobTypeLower = filterJobType.toLowerCase();
+              final filterLocationLower = filterLocation.toLowerCase();
+
+              if (searchQuery.isNotEmpty &&
+                  (category?.contains(searchLower) == true ||
+                      jobType?.contains(searchLower) == true ||
+                      location?.contains(searchLower) == true)) {
+                return true;
+              }
+
+              if (filterCategory.isNotEmpty &&
+                  category?.contains(filterCategoryLower) == true) {
+                return true;
+              }
+
+              if (filterJobType.isNotEmpty &&
+                  jobType?.contains(filterJobTypeLower) == true) {
+                return true;
+              }
+
+              if (filterLocation.isNotEmpty &&
+                  location?.contains(filterLocationLower) == true) {
+                return true;
+              }
+
+              // Display all jobs if no filters applied
+              if (searchQuery.isEmpty &&
+                  filterCategory.isEmpty &&
+                  filterJobType.isEmpty &&
+                  filterLocation.isEmpty) {
+                return true;
+              }
+
               return false;
-            }
+            },
+          ).toList();
 
-            final category = jobData['category']?.toString().toLowerCase();
-            final jobType = jobData['jobtype']?.toString().toLowerCase();
-            final location = jobData['location']?.toString().toLowerCase();
-            final searchLower = searchQuery.toLowerCase();
-            final filterCategoryLower = filterCategory.toLowerCase();
-            final filterJobTypeLower = filterJobType.toLowerCase();
-            final filterLocationLower = filterLocation.toLowerCase();
+          final sortedJobs = List.from(filteredJobs)
+              .where((job) =>
+                  job.data() is Map<String, dynamic> &&
+                  job.data()!['NoOfApplicants'] != null)
+              .toList()
+            ..sort((a, b) => (b.data()!['NoOfApplicants'] as int)
+                .compareTo(a.data()!['NoOfApplicants'] as int));
 
-            if (searchQuery.isNotEmpty &&
-                (category?.contains(searchLower) == true ||
-                    jobType?.contains(searchLower) == true ||
-                    location?.contains(searchLower) == true)) {
-              return true;
-            }
-
-            if (filterCategory.isNotEmpty &&
-                category?.contains(filterCategoryLower) == true) {
-              return true;
-            }
-
-            if (filterJobType.isNotEmpty &&
-                jobType?.contains(filterJobTypeLower) == true) {
-              return true;
-            }
-
-            if (filterLocation.isNotEmpty &&
-                location?.contains(filterLocationLower) == true) {
-              return true;
-            }
-
-            // Display all jobs if no filters applied
-            if (searchQuery.isEmpty &&
-                filterCategory.isEmpty &&
-                filterJobType.isEmpty &&
-                filterLocation.isEmpty) {
-              return true;
-            }
-
-            return false;
-          },
-        ).toList();
-
-        final sortedJobs = List.from(filteredJobs)
-  .where((job) => job.data() is Map<String, dynamic> && job.data()!['noOfApplicants'] != null)
-  .toList()
-    ..sort((a, b) => (b.data()!['noOfApplicants'] as int)
-        .compareTo(a.data()!['noOfApplicants'] as int));
-
-
-        final popularJobs = sortedJobs.take(3).toList();
-        final recentPosts = filteredJobs
-            .where((job) => !popularJobs.contains(job))
-            .toList();
+          final popularJobs = sortedJobs.take(3).toList();
+          final recentPosts =
+              filteredJobs.where((job) => !popularJobs.contains(job)).toList();
 
           return ListView(
             padding: EdgeInsets.all(16),
@@ -359,7 +357,7 @@ Widget build(BuildContext context) {
                       onPressed: () {
                         // Handle filter button press
                         // _showFilterDialog(context);
-                         _showFilterBottomSheet(context);
+                        _showFilterBottomSheet(context);
                       },
                     ),
                   ),
@@ -398,7 +396,8 @@ Widget build(BuildContext context) {
                     final requirements = jobData['requirements'];
                     final postedby = jobData['postedby'];
                     final noOfApplicants =
-                        jobData['noOfApplicants'] ?? 0; // Added
+                        jobData['NoOfApplicants'] ?? 0; // Added
+                    final CompanyName = jobData['companyDetails'];
 
                     return GestureDetector(
                       onTap: () {
@@ -407,7 +406,8 @@ Widget build(BuildContext context) {
                           context,
                           MaterialPageRoute(
                             builder: (context) => JobDetailsPage(
-                              documentId: jobSnapshot.id, // Pass the document ID
+                              documentId:
+                                  jobSnapshot.id, // Pass the document ID
                               location: location,
                               salary: salary,
                               category: category,
@@ -416,7 +416,7 @@ Widget build(BuildContext context) {
                               description: description,
                               requirements: requirements,
                               postedby: postedby,
-                              noOfApplicants: noOfApplicants,
+                              noOfApplicants: noOfApplicants, CompanyName: CompanyName,
                             ),
                           ),
                         );
@@ -473,9 +473,9 @@ Widget build(BuildContext context) {
                                         color: Colors.grey[600],
                                       ),
                                     ),
-                                    
-                                     SizedBox(height: 16),
-                                    Row( // Wrap salary and applicants in a row
+                                    SizedBox(height: 16),
+                                    Row(
+                                      // Wrap salary and applicants in a row
                                       children: [
                                         Text(
                                           'Salary: \$${salary}/m',
@@ -536,7 +536,8 @@ Widget build(BuildContext context) {
                   final description = jobData['description'];
                   final requirements = jobData['requirements'];
                   final postedby = jobData['postedby'];
-                  final noOfApplicants = jobData['noOfApplicants'] ?? 0;
+                  final noOfApplicants = jobData['NoOfApplicants'] ?? 0;
+                   final CompanyName = jobData['companyDetails'];
 
                   return GestureDetector(
                     onTap: () {
@@ -554,7 +555,7 @@ Widget build(BuildContext context) {
                             description: description,
                             requirements: requirements,
                             postedby: postedby,
-                            noOfApplicants: noOfApplicants,
+                            noOfApplicants: noOfApplicants, CompanyName: CompanyName,
                           ),
                         ),
                       );
