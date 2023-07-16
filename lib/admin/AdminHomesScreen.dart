@@ -1,4 +1,3 @@
-
 // import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:flutter/material.dart';
 // import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -185,12 +184,15 @@
 //   }
 // }
 
+import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:vuna__gigs/admin/userList.dart';
 import 'package:vuna__gigs/screens/login_screen.dart';
 import 'package:vuna__gigs/screens/methods.dart';
+import 'package:http/http.dart' as http;
 
 class AdminHomeScreen extends StatefulWidget {
   final String currentuserEmail;
@@ -221,25 +223,96 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     _flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
+  // void sendNotification(String title, String body) async {
+  //   AndroidNotificationDetails androidNotificationDetails =
+  //       AndroidNotificationDetails(
+  //     'channelId',
+  //     'channelName',
+  //     importance: Importance.max,
+  //     priority: Priority.high,
+  //   );
+
+  //   NotificationDetails notificationDetails = NotificationDetails(
+  //     android: androidNotificationDetails,
+  //   );
+
+  //   await _flutterLocalNotificationsPlugin.show(
+  //     0,
+  //     title,
+  //     body,
+  //     notificationDetails,
+  //   );
+  // }
   void sendNotification(String title, String body) async {
-    AndroidNotificationDetails androidNotificationDetails =
-        AndroidNotificationDetails(
-      'channelId',
-      'channelName',
-      importance: Importance.max,
-      priority: Priority.high,
-    );
+    // Retrieve all users from the database
+    List<String> allUserTokens =
+        await getAllUserTokens(); // Implement this method to fetch all user tokens
 
-    NotificationDetails notificationDetails = NotificationDetails(
-      android: androidNotificationDetails,
-    );
+    // Send notifications to each user
+    for (String token in allUserTokens) {
+      SendNotification(title, body, token);
+    }
+  }
 
-    await _flutterLocalNotificationsPlugin.show(
-      0,
-      title,
-      body,
-      notificationDetails,
-    );
+  void SendNotification(String title, String body, String token) async {
+    final data = {
+      'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+      'id': '1',
+      'status': 'done',
+      'title': title,
+      'body': body,
+    };
+
+    try {
+      http.Response response = await http.post(
+        Uri.parse('https://fcm.googleapis.com/fcm/send'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization':
+              'key=AAAA6msbZ3E:APA91bHFliFq8amgNOiLnltmuo2AxFHnxfLoFk6uVeSf1LEH7jti-i7l-jtiuFZN61koUeAC94Wa_ckPSE5Ao8xFfK_fiDxtV4sArdob_scjxoVcqXnBTulJ_SH6tE48u0RJGiZyEV_p'
+        },
+        body: jsonEncode(<String, dynamic>{
+          'notification': <String, dynamic>{
+            'title': '${title} : ${body}',
+            'body': '',
+          },
+          'priority': 'high',
+          'data': data,
+          'to': token,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print("Notification sent successfully to $token");
+      } else {
+        print("Error sending notification to $token");
+      }
+    } catch (e) {
+      print("Error: $e");
+    }
+  }
+
+  Future<List<String>> getAllUserTokens() async {
+    List<String> userTokens = [];
+
+    try {
+      QuerySnapshot snapshot =
+          await FirebaseFirestore.instance.collection('users').get();
+      snapshot.docs.forEach((doc) {
+        // Assuming the token field is named "token" in each user document
+        Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
+        if (data != null) {
+          String? token = data['token'] as String?;
+          if (token != null && token.isNotEmpty) {
+            userTokens.add(token);
+          }
+        }
+      });
+    } catch (e) {
+      print("Error fetching user tokens: $e");
+    }
+
+    return userTokens;
   }
 
   @override
@@ -339,7 +412,6 @@ class _NotificationFormState extends State<NotificationForm> {
         ),
         SizedBox(height: 10),
         ElevatedButton(
-
           onPressed: () {
             final title = _titleController.text;
             final body = _bodyController.text;
@@ -348,7 +420,9 @@ class _NotificationFormState extends State<NotificationForm> {
             _bodyController.clear();
           },
           child: Text('Send'),
-          style: ButtonStyle(minimumSize: MaterialStateProperty.all<Size>(Size(double.infinity,50))),
+          style: ButtonStyle(
+              minimumSize:
+                  MaterialStateProperty.all<Size>(Size(double.infinity, 50))),
         ),
       ],
     );
