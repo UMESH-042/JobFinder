@@ -261,7 +261,7 @@ class _HomePageState extends State<HomePage> {
                           color: Colors.white,
                         ),
                       ),
-                      title: Text('Applications'),
+                      title: Text('My Applications'),
                       onTap: () {
                         Navigator.push(
                             context,
