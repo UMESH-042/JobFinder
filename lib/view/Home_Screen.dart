@@ -13,6 +13,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:vuna__gigs/notification/notification_service.dart';
+import 'package:vuna__gigs/view/MyApplications.dart';
 import 'package:vuna__gigs/view/add_jobs.dart';
 import 'package:vuna__gigs/view/Edit_profile_page.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -66,7 +67,8 @@ class _HomePageState extends State<HomePage> {
 
     final currentUID = FirebaseAuth.instance.currentUser?.uid;
     if (currentUID != null) {
-      final userDocRef = FirebaseFirestore.instance.collection('users').doc(currentUID);
+      final userDocRef =
+          FirebaseFirestore.instance.collection('users').doc(currentUID);
       userDocRef.get().then((snapshot) {
         if (snapshot.exists) {
           setState(() {
@@ -153,232 +155,239 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
-Widget build(BuildContext context) {
-  final authProvider = Provider.of<AuthProvider>(context);
+  Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
 
-  return Scaffold(
-    backgroundColor: Color.fromARGB(255, 249, 250, 251),
-    appBar: _currentIndex == 0
-        ? AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            leading: Builder(
-              builder: (BuildContext context) {
-                return Container(
-                  margin: EdgeInsets.only(left: 17),
-                  child: IconButton(
-                    padding: EdgeInsets.all(0),
-                    icon: ClipRRect(
-                      borderRadius: BorderRadius.circular(9),
-                      child: Container(
-                        color: Color.fromARGB(255, 76, 175, 142),
-                        child: Icon(
-                          Icons.menu,
-                          color: Colors.white,
-                          size: 40,
+    return Scaffold(
+      backgroundColor: Color.fromARGB(255, 249, 250, 251),
+      appBar: _currentIndex == 0
+          ? AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              leading: Builder(
+                builder: (BuildContext context) {
+                  return Container(
+                    margin: EdgeInsets.only(left: 17),
+                    child: IconButton(
+                      padding: EdgeInsets.all(0),
+                      icon: ClipRRect(
+                        borderRadius: BorderRadius.circular(9),
+                        child: Container(
+                          color: Color.fromARGB(255, 76, 175, 142),
+                          child: Icon(
+                            Icons.menu,
+                            color: Colors.white,
+                            size: 40,
+                          ),
                         ),
                       ),
+                      onPressed: () {
+                        Scaffold.of(context).openDrawer();
+                      },
                     ),
-                    onPressed: () {
-                      Scaffold.of(context).openDrawer();
-                    },
+                  );
+                },
+              ),
+              actions: [
+                Container(
+                  margin: EdgeInsets.only(right: 17),
+                  child: IconButton(
+                    padding: EdgeInsets.all(0),
+                    icon: CircleAvatar(
+                      backgroundColor: Color.fromARGB(255, 76, 175, 142),
+                      backgroundImage: _imageUrl != null
+                          ? CachedNetworkImageProvider(_imageUrl!)
+                          : null,
+                    ),
+                    onPressed: () {},
+                  ),
+                ),
+              ],
+            )
+          : null,
+      drawer: _currentIndex == 0
+          ? Drawer(
+              child: Container(
+                alignment: Alignment.center,
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
+                    DrawerHeader(
+                      decoration: BoxDecoration(
+                        color: Color.fromARGB(255, 76, 175, 142),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircleAvatar(
+                            radius: 40,
+                            backgroundColor: Colors.white,
+                            backgroundImage: _imageUrl != null
+                                ? CachedNetworkImageProvider(_imageUrl!)
+                                : null,
+                          ),
+                          SizedBox(height: 10),
+                          Text(
+                            widget.currentUserEmail,
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          SizedBox(height: 10),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: Color.fromARGB(255, 255, 115, 0),
+                        child: Icon(
+                          Icons.person,
+                          color: Colors.white,
+                        ),
+                      ),
+                      title: Text('Edit Profile'),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => EditProfilePage()),
+                        );
+                      },
+                    ),
+                    SizedBox(height: 10),
+                    ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: Color.fromARGB(255, 255, 156, 7),
+                        child: Icon(
+                          Icons.access_time_filled,
+                          color: Colors.white,
+                        ),
+                      ),
+                      title: Text('Applications'),
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => MyApplicationPage(currentUserEmail: widget.currentUserEmail,)));
+                      },
+                    ),
+                    SizedBox(height: 10),
+                    ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor:
+                            const Color.fromARGB(255, 76, 175, 140),
+                        child: Icon(
+                          Icons.settings,
+                          color: Colors.white,
+                        ),
+                      ),
+                      title: Text('Notification Settings'),
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
+                    ),
+                    SizedBox(height: 10),
+                    ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: Colors.pink[300],
+                        child: Icon(
+                          Icons.share_location_outlined,
+                          color: Colors.white,
+                        ),
+                      ),
+                      title: Text('Share App'),
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
+                    ),
+                    SizedBox(height: 10),
+                    ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: Colors.red,
+                        child: Icon(
+                          Icons.arrow_circle_left,
+                          color: Colors.white,
+                        ),
+                      ),
+                      title: Text('Logout'),
+                      onTap: () {
+                        Navigator.pop(context);
+                        authProvider.logOut(context);
+                        print('logout successful');
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : null,
+      body: isLoading
+          ? ShimmerEffect()
+          : Column(
+              children: [
+                Expanded(
+                  child: Center(
+                    child: _screens[_currentIndex],
+                  ),
+                ),
+              ],
+            ),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(30),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.3),
+              spreadRadius: 1,
+              blurRadius: 5,
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(30),
+          ),
+          child: CurvedNavigationBar(
+            backgroundColor: Color.fromARGB(255, 76, 175, 142),
+            color: Colors.white,
+            buttonBackgroundColor: Color.fromARGB(255, 76, 175, 142),
+            height: 65,
+            animationCurve: Curves.easeInOut,
+            animationDuration: Duration(milliseconds: 300),
+            index: _currentIndex,
+            items: [
+              Icon(Icons.home),
+              Icon(Icons.chat_outlined),
+              Icon(Icons.person),
+              Icon(Icons.settings),
+            ],
+            onTap: (index) {
+              setState(() {
+                _currentIndex = index;
+              });
+            },
+          ),
+        ),
+      ),
+      floatingActionButton: _currentIndex == 0
+          ? FloatingActionButton(
+              backgroundColor: Color.fromARGB(255, 76, 175, 142),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AddJobs(
+                      otherUserEmail: widget.currentUserEmail,
+                    ),
                   ),
                 );
               },
-            ),
-            actions: [
-              Container(
-                margin: EdgeInsets.only(right: 17),
-                child: IconButton(
-                  padding: EdgeInsets.all(0),
-                  icon: CircleAvatar(
-                    backgroundColor: Color.fromARGB(255, 76, 175, 142),
-                    backgroundImage: _imageUrl != null ? CachedNetworkImageProvider(_imageUrl!) : null,
-                  ),
-                  onPressed: () {},
-                ),
-              ),
-            ],
-          )
-        : null,
-    drawer: _currentIndex == 0
-        ? Drawer(
-            child: Container(
-              alignment: Alignment.center,
-              child: ListView(
-                padding: EdgeInsets.zero,
-                children: [
-                  DrawerHeader(
-                    decoration: BoxDecoration(
-                      color: Color.fromARGB(255, 76, 175, 142),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CircleAvatar(
-                          radius: 40,
-                          backgroundColor: Colors.white,
-                          backgroundImage: _imageUrl != null ? CachedNetworkImageProvider(_imageUrl!) : null,
-                        ),
-                        SizedBox(height: 10),
-                        Text(
-                          widget.currentUserEmail,
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        SizedBox(height: 10),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: Color.fromARGB(255, 255, 115, 0),
-                      child: Icon(
-                        Icons.person,
-                        color: Colors.white,
-                      ),
-                    ),
-                    title: Text('Edit Profile'),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => EditProfilePage()),
-                      );
-                    },
-                  ),
-                  SizedBox(height: 10),
-                  ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: Color.fromARGB(255, 255, 156, 7),
-                      child: Icon(
-                        Icons.access_time_filled,
-                        color: Colors.white,
-                      ),
-                    ),
-                    title: Text('Applications'),
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                  SizedBox(height: 10),
-                  ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: const Color.fromARGB(255, 76, 175, 140),
-                      child: Icon(
-                        Icons.settings,
-                        color: Colors.white,
-                      ),
-                    ),
-                    title: Text('Notification Settings'),
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                  SizedBox(height: 10),
-                  ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: Colors.pink[300],
-                      child: Icon(
-                        Icons.share_location_outlined,
-                        color: Colors.white,
-                      ),
-                    ),
-                    title: Text('Share App'),
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                  SizedBox(height: 10),
-                  ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: Colors.red,
-                      child: Icon(
-                        Icons.arrow_circle_left,
-                        color: Colors.white,
-                      ),
-                    ),
-                    title: Text('Logout'),
-                    onTap: () {
-                      Navigator.pop(context);
-                      authProvider.logOut(context);
-                      print('logout successful');
-                    },
-                  ),
-                ],
-              ),
-            ),
-          )
-        : null,
-    body: isLoading
-        ? ShimmerEffect()
-        : Column(
-            children: [
-              Expanded(
-                child: Center(
-                  child: _screens[_currentIndex],
-                ),
-              ),
-            ],
-          ),
-    bottomNavigationBar: Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(30),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.3),
-            spreadRadius: 1,
-            blurRadius: 5,
-            offset: Offset(0, 3),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(30),
-        ),
-        child: CurvedNavigationBar(
-          backgroundColor: Color.fromARGB(255, 76, 175, 142),
-          color: Colors.white,
-          buttonBackgroundColor: Color.fromARGB(255, 76, 175, 142),
-          height: 65,
-          animationCurve: Curves.easeInOut,
-          animationDuration: Duration(milliseconds: 300),
-          index: _currentIndex,
-          items: [
-            Icon(Icons.home),
-            Icon(Icons.chat_outlined),
-            Icon(Icons.person),
-            Icon(Icons.settings),
-          ],
-          onTap: (index) {
-            setState(() {
-              _currentIndex = index;
-            });
-          },
-        ),
-      ),
-    ),
-    floatingActionButton: _currentIndex == 0
-        ? FloatingActionButton(
-            backgroundColor: Color.fromARGB(255, 76, 175, 142),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => AddJobs(
-                    otherUserEmail: widget.currentUserEmail,
-                  ),
-                ),
-              );
-            },
-            child: Icon(Icons.add),
-          )
-        : null,
-  );
-}
-
+              child: Icon(Icons.add),
+            )
+          : null,
+    );
+  }
 }
 
 class AuthProvider with ChangeNotifier {

@@ -100,14 +100,56 @@ class _JobDetailsPageState extends State<JobDetailsPage> {
       throw e;
     }
   }
+  Future<void> storeAppliedJob() async {
+  try {
+    String currentUserEmail = FirebaseAuth.instance.currentUser!.email!;
+    final appliedJobsRef = FirebaseFirestore.instance.collection('applied_jobs');
+
+    await appliedJobsRef.add({
+      'user_email': currentUserEmail,
+      'job_details': {
+        'document_id': widget.documentId,
+        'location': widget.location,
+        'salary': widget.salary,
+        'category': widget.category,
+        'image': widget.image,
+        'jobtype': widget.jobtype,
+        'description': widget.description,
+        'requirements': widget.requirements,
+        'postedby': widget.postedby,
+        'noOfApplicants': widget.noOfApplicants,
+        'CompanyName': widget.CompanyName,
+      },
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Successfully applied for the job.'),
+        backgroundColor: Colors.green,
+      ),
+    );
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Failed to apply for the job. Please try again.'),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+}
+
 
   Widget button(BuildContext context) {
     return InkWell(
-      onTap: () {
+      onTap: () async{
         String currentUserEmail = FirebaseAuth.instance.currentUser!.email!;
         setState(() {
           _isLoading = true;
         });
+
+  await storeAppliedJob();
+        
         sendMessageToPostedByUser(currentUserEmail).then((_) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

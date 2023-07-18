@@ -61,6 +61,9 @@ dependencies:
   http: ^0.13.0
   flutter_paystack: ^1.0.7
   cached_network_image: ^3.2.3
+  shared_preferences: ^2.2.0
+  showcaseview: ^2.0.3
+  feature_discovery: ^0.14.1
 
 
 
