@@ -22,7 +22,7 @@ import '../screens/login_screen.dart';
 import 'ChatScreen.dart';
 import 'DisplayJobs.dart';
 import 'Profile_Screen.dart';
-import 'Settings_Screen.dart';
+import 'ApplicantsList.dart';
 import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
 
@@ -82,7 +82,7 @@ class _HomePageState extends State<HomePage> {
       JobListPage(),
       ChatScreen(currentUserEmail: widget.currentUserEmail),
       ProfileScreen(useremail: currentUID!),
-      SettingsScreen(),
+      ApplicantsListScreen(postedByEmail: widget.currentUserEmail,),
     ];
 
     Future.delayed(Duration(seconds: 2), () {

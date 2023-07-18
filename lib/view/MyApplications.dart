@@ -69,11 +69,14 @@ class _MyApplicationPageState extends State<MyApplicationPage> {
 
                 final jobDetails =
                     jobData['job_details'] as Map<String, dynamic>;
-                final category = jobDetails['category'] as String?;
+                final category = jobDetails['category'] as String;
                 final jobType = jobDetails['jobtype'] as String?;
+                final companyName = jobDetails['CompanyName'] as String;
                 final timestamp = jobData['timestamp'] as Timestamp;
 
                 final timeDifference = getTimeDifferenceFromNow(timestamp);
+
+                 final imageUrl = jobDetails['image'] as String?;
 
                 return Dismissible(
                   key: Key(application.id),
@@ -104,8 +107,9 @@ class _MyApplicationPageState extends State<MyApplicationPage> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: ListTile(
+                      leading: imageUrl!=null?Image.network(imageUrl,width: 40,height: 40,fit: BoxFit.cover,):Icon(Icons.image_not_supported,size: 56,),
                       title: Text(
-                        category ?? '',
+                        '${category} (${companyName})',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:vuna__gigs/view/ApplicationScreen.dart';
 
 class JobDetailsPage extends StatefulWidget {
   final String documentId; // Add document ID parameter
@@ -149,6 +150,7 @@ class _JobDetailsPageState extends State<JobDetailsPage> {
         });
 
   await storeAppliedJob();
+  Navigator.push(context, MaterialPageRoute(builder: (context)=>ApplicationFormScreen(documentId: widget.documentId, postedByEmail: widget.postedby)));
         
         sendMessageToPostedByUser(currentUserEmail).then((_) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -160,7 +162,7 @@ class _JobDetailsPageState extends State<JobDetailsPage> {
           setState(() {
             _currentApplicants++; // Increase the value by one
           });
-          Navigator.pop(context);
+          // Navigator.pop(context);
         }).catchError((error) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
