@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import 'Job_Details.dart';
+import 'package:intl/intl.dart';
 
 class JobListPage extends StatefulWidget {
   @override
@@ -13,26 +14,28 @@ class _JobListPageState extends State<JobListPage> {
   String filterCategory = '';
   String filterJobType = '';
   String filterLocation = '';
-   List<String> categoriesList = []; // Store the list of unique categories
-   List<String> jobTypesList = []; // Store the list of unique job types
+  List<String> categoriesList = []; // Store the list of unique categories
+  List<String> jobTypesList = []; // Store the list of unique job types
 
-     @override
+  @override
   void initState() {
     super.initState();
     fetchCategoriesListAndJobTypesList();
   }
 
- // Fetch categories from Firestore and store unique ones in categoriesList
+  // Fetch categories from Firestore and store unique ones in categoriesList
   Future<void> fetchCategoriesListAndJobTypesList() async {
     final snapshot = await FirebaseFirestore.instance.collection('jobs').get();
     final categories = snapshot.docs
-        .map((doc) => doc.data()['category'] as String?) // Get all category values
+        .map((doc) =>
+            doc.data()['category'] as String?) // Get all category values
         .whereType<String>() // Remove null values (if any)
         .toSet() // Convert to Set to remove duplicates
         .toList(); // Convert back to List
-        
+
     final jobTypes = snapshot.docs
-        .map((doc) => doc.data()['jobtype'] as String?) // Get all job type values
+        .map((doc) =>
+            doc.data()['jobtype'] as String?) // Get all job type values
         .whereType<String>() // Remove null values (if any)
         .toSet() // Convert to Set to remove duplicates
         .toList(); // Convert back to List
@@ -55,176 +58,81 @@ class _JobListPageState extends State<JobListPage> {
         bool showFilterJobType = selectedJobType.isNotEmpty;
         bool showFilterLocation = selectedLocation.isNotEmpty;
 
-        // return SingleChildScrollView(
-        //   child: Padding(
-        //     padding: EdgeInsets.all(16),
-        //     child: Column(
-        //       crossAxisAlignment: CrossAxisAlignment.start,
-        //       children: [
-        //         Text(
-        //           'Select a Category',
-        //           style: TextStyle(
-        //             fontSize: 16,
-        //             fontWeight: FontWeight.bold,
-        //           ),
-        //         ),
-        //         SizedBox(height: 8),
-        //         DropdownButton<String>(
-        //           value: selectedFilter,
-        //           isExpanded: true,
-        //           underline: Container(
-        //             height: 1,
-        //             color: Colors.grey[400],
-        //           ),
-        //           items: [
-        //             DropdownMenuItem(
-        //               value: '',
-        //               child: Text('All'),
-        //             ),
-        //             DropdownMenuItem(
-        //               value: 'SDE',
-        //               child: Text('SDE'),
-        //             ),
-        //             DropdownMenuItem(
-        //               value: 'UI/UX Designer',
-        //               child: Text('UI/UX Designer'),
-        //             ),
-        //             DropdownMenuItem(
-        //               value: 'Lead Product Manager',
-        //               child: Text('Lead Product Manager'),
-        //             ),
-        //           ],
-        //           onChanged: (value) {
-        //             setState(() {
-        //               selectedFilter = value!;
-        //               filterCategory = value!;
-        //               showFilterCategory = true;
-        //             });
-        //           },
-        //         ),
-        
-    return SingleChildScrollView(
-      child: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Select a Category',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 8),
-            DropdownButton<String>(
-              value: selectedFilter,
-              isExpanded: true,
-              underline: Container(
-                height: 1,
-                color: Colors.grey[400],
-              ),
-              items: [
-                DropdownMenuItem(
-                  value: '',
-                  child: Text('All'),
+ 
+
+        return SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Select a Category',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                ...categoriesList.map((category) => DropdownMenuItem(
-                      value: category,
-                      child: Text(category),
-                    )),
-              ],
-              onChanged: (value) {
-                setState(() {
-                  selectedFilter = value!;
-                  filterCategory = value!;
-                  showFilterCategory = true;
-                });
-              },
-            ),
+                SizedBox(height: 8),
+                DropdownButton<String>(
+                  value: selectedFilter,
+                  isExpanded: true,
+                  underline: Container(
+                    height: 1,
+                    color: Colors.grey[400],
+                  ),
+                  items: [
+                    DropdownMenuItem(
+                      value: '',
+                      child: Text('All'),
+                    ),
+                    ...categoriesList.map((category) => DropdownMenuItem(
+                          value: category,
+                          child: Text(category),
+                        )),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      selectedFilter = value!;
+                      filterCategory = value!;
+                      showFilterCategory = true;
+                    });
+                  },
+                ),
                 SizedBox(height: 16),
-                // Text(
-                //   'Job Type',
-                //   style: TextStyle(
-                //     fontSize: 16,
-                //     fontWeight: FontWeight.bold,
-                //   ),
-                // ),
-                // SizedBox(height: 8),
-                // DropdownButton<String>(
-                //   value: selectedJobType,
-                //   isExpanded: true,
-                //   underline: Container(
-                //     height: 1,
-                //     color: Colors.grey[400],
-                //   ),
-                //   items: [
-                //     DropdownMenuItem(
-                //       value: '',
-                //       child: Text('All'),
-                //     ),
-                //     DropdownMenuItem(
-                //       value: 'Full Time',
-                //       child: Text('Full Time'),
-                //     ),
-                //     DropdownMenuItem(
-                //       value: 'Part Time',
-                //       child: Text('Part Time'),
-                //     ),
-                //     DropdownMenuItem(
-                //       value: 'Freelance',
-                //       child: Text('Freelance'),
-                //     ),
-                //     DropdownMenuItem(
-                //       value: 'Remote',
-                //       child: Text('Remote'),
-                //     ),
-                //     DropdownMenuItem(
-                //       value: 'Contract',
-                //       child: Text('Contract'),
-                //     ),
-                //   ],
-                //   onChanged: (value) {
-                //     setState(() {
-                //       selectedJobType = value!;
-                //       filterJobType = value!;
-                //       showFilterJobType = true;
-                //     });
-                //   },
-                // ),
-                  Text(
-              'Job Type',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 8),
-            DropdownButton<String>(
-              value: selectedJobType,
-              isExpanded: true,
-              underline: Container(
-                height: 1,
-                color: Colors.grey[400],
-              ),
-              items: [
-                DropdownMenuItem(
-                  value: '',
-                  child: Text('All'),
+                Text(
+                  'Job Type',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                ...jobTypesList.map((jobType) => DropdownMenuItem(
-                      value: jobType,
-                      child: Text(jobType),
-                    )),
-              ],
-              onChanged: (value) {
-                setState(() {
-                  selectedJobType = value!;
-                  filterJobType = value!;
-                  showFilterJobType = true;
-                });
-              },
-            ),
+                SizedBox(height: 8),
+                DropdownButton<String>(
+                  value: selectedJobType,
+                  isExpanded: true,
+                  underline: Container(
+                    height: 1,
+                    color: Colors.grey[400],
+                  ),
+                  items: [
+                    DropdownMenuItem(
+                      value: '',
+                      child: Text('All'),
+                    ),
+                    ...jobTypesList.map((jobType) => DropdownMenuItem(
+                          value: jobType,
+                          child: Text(jobType),
+                        )),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      selectedJobType = value!;
+                      filterJobType = value!;
+                      showFilterJobType = true;
+                    });
+                  },
+                ),
                 SizedBox(height: 16),
                 Text(
                   'Location',
@@ -339,6 +247,21 @@ class _JobListPageState extends State<JobListPage> {
         ),
       ),
     );
+  }
+  String getTimeDifferenceFromNow(Timestamp timestamp) {
+    final now = DateTime.now();
+    final time = timestamp.toDate();
+    final difference = now.difference(time);
+
+    if (difference.inDays > 0) {
+      return '${difference.inDays}d ago';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours}hr ago';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes}min ago';
+    } else {
+      return 'just now';
+    }
   }
 
   @override
@@ -518,7 +441,8 @@ class _JobListPageState extends State<JobListPage> {
                               description: description,
                               requirements: requirements,
                               postedby: postedby,
-                              noOfApplicants: noOfApplicants, CompanyName: CompanyName,
+                              noOfApplicants: noOfApplicants,
+                              CompanyName: CompanyName,
                             ),
                           ),
                         );
@@ -639,8 +563,9 @@ class _JobListPageState extends State<JobListPage> {
                   final requirements = jobData['requirements'];
                   final postedby = jobData['postedby'];
                   final noOfApplicants = jobData['NoOfApplicants'] ?? 0;
-                   final CompanyName = jobData['companyDetails'];
-
+                  final CompanyName = jobData['companyDetails'];
+                  final timestamp = jobData['timestamp'] as Timestamp;
+                  final timeDifference = getTimeDifferenceFromNow(timestamp);
                   return GestureDetector(
                     onTap: () {
                       // Navigate to job details page
@@ -657,7 +582,8 @@ class _JobListPageState extends State<JobListPage> {
                             description: description,
                             requirements: requirements,
                             postedby: postedby,
-                            noOfApplicants: noOfApplicants, CompanyName: CompanyName,
+                            noOfApplicants: noOfApplicants,
+                            CompanyName: CompanyName,
                           ),
                         ),
                       );
@@ -701,12 +627,27 @@ class _JobListPageState extends State<JobListPage> {
                             SizedBox(height: 4),
                           ],
                         ),
-                        trailing: Text(
-                          '\$$salary/m',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[600],
-                          ),
+                        trailing: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              timeDifference, // Use your timestamp field here
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            SizedBox(
+                              height: 16,
+                            ),
+                            Text(
+                              '\$$salary/m',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),

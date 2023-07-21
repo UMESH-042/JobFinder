@@ -189,10 +189,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:vuna__gigs/admin/joblist_view.dart';
 import 'package:vuna__gigs/admin/userList.dart';
 import 'package:vuna__gigs/screens/login_screen.dart';
 import 'package:vuna__gigs/screens/methods.dart';
 import 'package:http/http.dart' as http;
+import 'package:vuna__gigs/view/DisplayJobs.dart';
 
 class AdminHomeScreen extends StatefulWidget {
   final String currentuserEmail;
@@ -349,6 +351,12 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
               child: Text('Users List'),
             ),
             SizedBox(height: 20),
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => AllJobsPage()));
+                },
+                child: Text('Jobs List')),
             Padding(
               padding: EdgeInsets.all(20),
               child: NotificationForm(

@@ -503,6 +503,7 @@ class _AddJobsState extends State<AddJobs> {
               "postedby": widget.otherUserEmail,
               "NoOfApplicants": 0,
               "companyDetails":_companyNameController.text,
+              'timestamp': FieldValue.serverTimestamp(),
             }).then((value) {
               setState(() {
                 _isAddingJob = false;
