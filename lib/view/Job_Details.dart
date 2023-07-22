@@ -43,6 +43,56 @@ class _JobDetailsPageState extends State<JobDetailsPage> {
   void initState() {
     super.initState();
     _currentApplicants = widget.noOfApplicants;
+     WidgetsBinding.instance!.addPostFrameCallback((_) {
+      _showInstructionsDialog();
+    });
+  }
+  //   void _showInstructionsDialog() {
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         title: Text("Instructions"),
+  //         content: Text("Welcome to the job details page. Please read the job description and requirements carefully. If you are interested in applying for this job, click the 'Apply for Job' button."),
+  //         actions: [
+  //           TextButton(
+  //             onPressed: () {
+  //               Navigator.of(context).pop();
+  //             },
+  //             child: Text("Okay"),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
+  
+  void _showInstructionsDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Instructions"),
+          content: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("1. After the job is over, the admin will pay you directly, and you'll need to get in touch with him using chats to do so."),
+              SizedBox(height: 16),
+              Text("2. Contact Admin for any Payment related issue."),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("Okay"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   String ChatRoomId(String user1, String user2) {
@@ -144,67 +194,6 @@ class _JobDetailsPageState extends State<JobDetailsPage> {
     }
   }
 
-  // Widget button(BuildContext context) {
-  //   return InkWell(
-  //     onTap: () async{
-  //       String currentUserEmail = FirebaseAuth.instance.currentUser!.email!;
-  //       setState(() {
-  //         _isLoading = true;
-  //       });
-
-  // await storeAppliedJob();
-  // Navigator.push(context, MaterialPageRoute(builder: (context)=>ApplicationFormScreen(documentId: widget.documentId, postedByEmail: widget.postedby)));
-
-  //       sendMessageToPostedByUser(currentUserEmail).then((_) {
-  //         ScaffoldMessenger.of(context).showSnackBar(
-  //           SnackBar(
-  //             content: Text('Successfully Applied'),
-  //             backgroundColor: Colors.green,
-  //           ),
-  //         );
-  //         setState(() {
-  //           _currentApplicants++; // Increase the value by one
-  //         });
-  //         // Navigator.pop(context);
-  //       }).catchError((error) {
-  //         ScaffoldMessenger.of(context).showSnackBar(
-  //           SnackBar(
-  //             content: Text('Application Failed'),
-  //             backgroundColor: Colors.red,
-  //           ),
-  //         );
-  //       }).whenComplete(() {
-  //         setState(() {
-  //           _isLoading = false;
-  //         });
-  //       });
-  //     },
-  //     child: Container(
-  //       margin: EdgeInsets.all(20),
-  //       width: MediaQuery.of(context).size.width,
-  //       height: 55,
-  //       decoration: BoxDecoration(
-  //         color: Color.fromARGB(255, 76, 175, 142),
-  //         borderRadius: BorderRadius.circular(15),
-  //       ),
-  //       child: Center(
-  //         child: _isLoading
-  //             ? SpinKitCircle(
-  //                 color: Colors.white,
-  //                 size: 25.0,
-  //               )
-  //             : Text(
-  //                 "Apply for Job",
-  //                 style: TextStyle(
-  //                   color: Colors.white,
-  //                   fontWeight: FontWeight.bold,
-  //                   fontSize: 17,
-  //                 ),
-  //               ),
-  //       ),
-  //     ),
-  //   );
-  // }
   Widget button(BuildContext context) {
     return InkWell(
       onTap: () async {

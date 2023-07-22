@@ -9,23 +9,24 @@ class AllJobsPage extends StatefulWidget {
 
 class _AllJobsPageState extends State<AllJobsPage> {
   String searchQuery = '';
+
+  Stream<int> getTotalJobsCountStream() {
+    final jobsCollection = FirebaseFirestore.instance.collection('jobs');
+    return jobsCollection.snapshots().map((snapshot) => snapshot.size);
+  }
+
   Future<void> deleteJob(String documentId) async {
     try {
-      // Get the reference to the job document using the document ID
       final jobRef =
           FirebaseFirestore.instance.collection('jobs').doc(documentId);
-
-      // Delete the job document
       await jobRef.delete();
 
-      // Show a snackbar to indicate successful deletion
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Job post deleted successfully.'),
         ),
       );
     } catch (e) {
-      // Show a snackbar to indicate error
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to delete the job post.'),
@@ -50,8 +51,8 @@ class _AllJobsPageState extends State<AllJobsPage> {
           ),
           TextButton(
             onPressed: () async {
-              Navigator.pop(context); // Close the dialog
-              await deleteJob(documentId); // Call the deleteJob function
+              Navigator.pop(context);
+              await deleteJob(documentId);
             },
             child: Text(
               'Yes',
@@ -65,7 +66,6 @@ class _AllJobsPageState extends State<AllJobsPage> {
 
   String getTimeDifferenceFromNow(Timestamp? timestamp) {
     if (timestamp == null) {
-      // Handle the case where the timestamp is null
       return 'No timestamp available';
     }
     final now = DateTime.now();
@@ -88,6 +88,7 @@ class _AllJobsPageState extends State<AllJobsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('All Jobs'),
+        backgroundColor: Color.fromARGB(255, 76, 175, 142),
       ),
       body: Column(
         children: [
@@ -96,7 +97,7 @@ class _AllJobsPageState extends State<AllJobsPage> {
             child: TextField(
               onChanged: (value) {
                 setState(() {
-                  searchQuery = value.toLowerCase(); // Convert to lowercase
+                  searchQuery = value.toLowerCase();
                 });
               },
               decoration: InputDecoration(
@@ -108,19 +109,58 @@ class _AllJobsPageState extends State<AllJobsPage> {
               ),
             ),
           ),
+          StreamBuilder<int>(
+            stream: getTotalJobsCountStream(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator();
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else {
+                final totalJobsCount = snapshot.data ?? 0;
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Color.fromARGB(255, 76, 175, 142),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Icon(
+                          Icons.work,
+                          color: Colors.white,
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          '$totalJobsCount Jobs Posted',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+            },
+          ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance.collection('jobs').snapshots(),
               builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Text('Error: ${snapshot.error}'),
-                  );
-                }
-
-                if (!snapshot.hasData) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(
                     child: CircularProgressIndicator(),
+                  );
+                } else if (snapshot.hasError) {
+                  return Center(
+                    child: Text('Error: ${snapshot.error}'),
                   );
                 }
 
@@ -134,24 +174,21 @@ class _AllJobsPageState extends State<AllJobsPage> {
                     final jobData = jobSnapshot.data() as Map<String, dynamic>?;
 
                     if (jobData == null) {
-                      // Handle null data
                       return SizedBox.shrink();
                     }
 
                     final category =
-                        jobData['category']?.toString()?.toLowerCase() ??
-                            ''; // Convert to lowercase
+                        jobData['category']?.toString()?.toLowerCase() ?? '';
                     final category_exact =
                         jobData['category']?.toString() ?? '';
                     final companyName =
                         jobData['companyDetails']?.toString()?.toLowerCase() ??
-                            ''; // Convert to lowercase
+                            '';
                     final containsSearchQuery =
                         category.contains(searchQuery) ||
                             companyName.contains(searchQuery);
 
                     if (searchQuery.isNotEmpty && !containsSearchQuery) {
-                      // Skip this item if the search query doesn't match the category or company name
                       return SizedBox.shrink();
                     }
 
@@ -169,13 +206,11 @@ class _AllJobsPageState extends State<AllJobsPage> {
 
                     return GestureDetector(
                       onTap: () {
-                        // Navigate to job details page
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => AdminJobDetailsPage(
-                              documentId:
-                                  jobSnapshot.id, // Pass the document ID
+                              documentId: jobSnapshot.id,
                               location: location,
                               salary: salary,
                               category: category,
@@ -232,8 +267,6 @@ class _AllJobsPageState extends State<AllJobsPage> {
                           trailing: IconButton(
                             icon: Icon(Icons.delete),
                             onPressed: () {
-                              // deleteJob(jobSnapshot
-                              // .id); // Call a function to delete the job post
                               confirmDeleteJob(jobSnapshot.id);
                             },
                           ),

@@ -16,11 +16,21 @@ class _JobListPageState extends State<JobListPage> {
   String filterLocation = '';
   List<String> categoriesList = []; // Store the list of unique categories
   List<String> jobTypesList = []; // Store the list of unique job types
+  int totalJobsCount = 0;
 
   @override
   void initState() {
     super.initState();
     fetchCategoriesListAndJobTypesList();
+    fetchTotalJobsCount();
+  }
+
+  void fetchTotalJobsCount() async {
+    final snapshot = await FirebaseFirestore.instance.collection('jobs').get();
+    setState(() {
+      totalJobsCount = snapshot.size;
+    });
+    print(totalJobsCount);
   }
 
   // Fetch categories from Firestore and store unique ones in categoriesList
@@ -399,13 +409,27 @@ class _JobListPageState extends State<JobListPage> {
                   ),
                 ],
               ),
+              
               SizedBox(height: 16),
-              Text(
-                'Popular Jobs',
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Popular Jobs',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                '$totalJobsCount Job opportunity', // Display the total jobs count
                 style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[600],
                 ),
+              ),
+                ],
               ),
               SizedBox(height: 16),
               Container(
