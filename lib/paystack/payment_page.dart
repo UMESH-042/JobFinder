@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_paystack/flutter_paystack.dart';
 
-
-
 class PaymentPage extends StatefulWidget {
   const PaymentPage({super.key});
 
@@ -18,23 +16,20 @@ class _PaymentPageState extends State<PaymentPage> {
   String publicKey = 'pk_test_8b8c061e04cc4294ba49f2f6b8fb045c30a87098';
   final plugin = PaystackPlugin();
   String message = '';
- bool _isInitComplete = false;
+  bool _isInitComplete = false;
   @override
   void initState() {
     super.initState();
     plugin.initialize(publicKey: publicKey);
-        WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _showPaymentInstructionsDialog();
       _isInitComplete = true;
     });
-
   }
 
+  int currentInstruction = 1;
 
-
-int currentInstruction = 1;
-
- void _showPaymentInstructionsDialog() {
+  void _showPaymentInstructionsDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -135,7 +130,8 @@ int currentInstruction = 1;
                 ElevatedButton(
                   onPressed: () {
                     Navigator.pop(context); // Close the dialog
-                    Navigator.pop(context, true); // Return payment status as true
+                    Navigator.pop(
+                        context, true); // Return payment status as true
                   },
                   style: ElevatedButton.styleFrom(
                     primary: Colors.green,
@@ -153,30 +149,6 @@ int currentInstruction = 1;
     );
   }
 
-  
-
-  // void makePayment() async {
-  //   int price = int.parse(amountController.text) * 100;
-  //   Charge charge = Charge()
-  //     ..amount = price
-  //     ..reference = 'ref_${DateTime.now()}'
-  //     ..email = emailController.text
-  //     ..currency = 'GHS';
-
-  //   CheckoutResponse response = await plugin.checkout(
-  //     context,
-  //     method: CheckoutMethod.card,
-  //     charge: charge,
-  //   );
-
-  //   if (response.status == true) {
-  //     String? reference = response.reference;
-  //     showSuccessDialog(reference!);
-  //   } else {
-  //     print(response.message);
-  //     Navigator.pop(context, false); // Return payment status as false
-  //   }
-  // }
   void makePayment() async {
     if (_formKey.currentState!.validate()) {
       int price = int.parse(amountController.text) * 100;
@@ -199,102 +171,16 @@ int currentInstruction = 1;
         print(response.message);
         Navigator.pop(context, false); // Return payment status as false
       }
-    } else {
-      // Show snackbar if the email field is empty
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(
-      //     content: Text('Please enter your email.'),
-      //   ),
-      // );
-    }
+    } else {}
   }
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: const Text('Payment Page'),
-//       ),
-//       body: Padding(
-//         padding: const EdgeInsets.all(12.0),
-//         child: Column(
-//           children: [
-//             // Payment instructions banner
-//             if (_isInitComplete) // Check if initState is completed before building the banner
-//               Container(
-//                 padding: EdgeInsets.all(12.0),
-//                 color: Colors.blue, // Customize the color as needed
-//                 child: Text(
-//                   'Please read the following instructions carefully:',
-//                   style: TextStyle(
-//                     color: Colors.white,
-//                     fontWeight: FontWeight.bold,
-//                   ),
-//                 ),
-//               ),
-//             SizedBox(height: 12), Form(
-//           key: _formKey,
-//           child: Column(
-//             children: [
-//               TextFormField(
-//                 controller: amountController,
-//                 autovalidateMode: AutovalidateMode.onUserInteraction,
-//                 validator: (value) {
-//                   if (value == null || value.isEmpty) {
-//                     return 'Please enter the amount';
-//                   }
-//                   return null;
-//                 },
-//                 decoration: const InputDecoration(
-//                   prefix: Text('GHS'),
-//                   hintText: '1000',
-//                   labelText: 'Amount',
-//                   border: OutlineInputBorder(),
-//                 ),
-//               ),
-//               Padding(
-//                 padding: const EdgeInsets.only(top: 15.0),
-//                 child: TextFormField(
-//                   controller: emailController,
-//                   autovalidateMode: AutovalidateMode.onUserInteraction,
-//                   validator: (value) {
-//                     if (value == null || value.isEmpty) {
-//                       return 'Please enter the email';
-//                     }
-//                     return null;
-//                   },
-//                   decoration: const InputDecoration(
-//                     hintText: 'example@gmail.com',
-//                     labelText: 'Email',
-//                     border: OutlineInputBorder(),
-//                   ),
-//                 ),
-//               ),
-//               Padding(
-//                 padding: const EdgeInsets.only(top: 20.0),
-//                 child: ElevatedButton(
-//                   onPressed: () {
-//                     makePayment();
-//                   },
-//                   child: const Text('Make Payment'),
-//                 ),
-//               )
-//             ],
-//           ),
-//         ),
-//           ]
-//         )
-//       ),
-//     );
-//   }
-// }
-
- @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Payment Page'),
-        backgroundColor: Color.fromARGB(255, 76, 175, 142), // Greenish-blue app bar color
+        backgroundColor:
+            Color.fromARGB(255, 76, 175, 142), // Greenish-blue app bar color
       ),
       body: Padding(
         padding: const EdgeInsets.all(12.0),
@@ -322,7 +208,8 @@ int currentInstruction = 1;
                   Container(
                     padding: EdgeInsets.all(12.0),
                     decoration: BoxDecoration(
-                      color: Color.fromARGB(255, 76, 175, 142), // Greenish-blue background color
+                      color: Color.fromARGB(
+                          255, 76, 175, 142), // Greenish-blue background color
                       borderRadius: BorderRadius.circular(10.0),
                     ),
                     child: Text(
@@ -381,7 +268,8 @@ int currentInstruction = 1;
                           makePayment();
                         },
                         style: ElevatedButton.styleFrom(
-                          primary: Color.fromARGB(255, 76, 175, 142), // Greenish-blue button color
+                          primary: Color.fromARGB(
+                              255, 76, 175, 142), // Greenish-blue button color
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10.0),
                           ),

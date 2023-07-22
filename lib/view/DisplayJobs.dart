@@ -58,8 +58,6 @@ class _JobListPageState extends State<JobListPage> {
         bool showFilterJobType = selectedJobType.isNotEmpty;
         bool showFilterLocation = selectedLocation.isNotEmpty;
 
- 
-
         return SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.all(16),
@@ -248,7 +246,12 @@ class _JobListPageState extends State<JobListPage> {
       ),
     );
   }
-  String getTimeDifferenceFromNow(Timestamp timestamp) {
+
+  String getTimeDifferenceFromNow(Timestamp? timestamp) {
+    if (timestamp == null) {
+      // Handle the case where the timestamp is null
+      return 'No timestamp available';
+    }
     final now = DateTime.now();
     final time = timestamp.toDate();
     final difference = now.difference(time);
@@ -343,8 +346,16 @@ class _JobListPageState extends State<JobListPage> {
                 .compareTo(a.data()!['NoOfApplicants'] as int));
 
           final popularJobs = sortedJobs.take(3).toList();
-          final recentPosts =
-              filteredJobs.where((job) => !popularJobs.contains(job)).toList();
+          final recentPosts = List.from(filteredJobs)
+              .where((job) => job.data() is Map<String, dynamic>)
+              .where((job) =>
+                  job.data()!['timestamp'] != null) // <-- Add this check
+              .toList()
+            ..sort((a, b) {
+              final aTimestamp = a.data()!['timestamp'] as Timestamp;
+              final bTimestamp = b.data()!['timestamp'] as Timestamp;
+              return bTimestamp.compareTo(aTimestamp);
+            });
 
           return ListView(
             padding: EdgeInsets.all(16),

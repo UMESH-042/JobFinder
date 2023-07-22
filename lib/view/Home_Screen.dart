@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -54,12 +55,16 @@ class _HomePageState extends State<HomePage> {
         .doc(FirebaseAuth.instance.currentUser!.uid)
         .set({'token': token}, SetOptions(merge: true));
   }
+  StreamSubscription<RemoteMessage>? _firebaseMessagingStream;
 
   @override
   void initState() {
     super.initState();
     FirebaseMessaging.instance.getInitialMessage();
-    FirebaseMessaging.onMessage.listen((event) {
+      // FirebaseMessaging.onMessage.listen((event) {
+      //   LocalNotificationService.display(event);
+      // });
+         _firebaseMessagingStream = FirebaseMessaging.onMessage.listen((event) {
       LocalNotificationService.display(event);
     });
 
@@ -108,6 +113,15 @@ class _HomePageState extends State<HomePage> {
     _requestNotificationPermissions();
   }
 
+
+   @override
+  void dispose() {
+    // ... Your other code ...
+    
+    _firebaseMessagingStream?.cancel();
+    super.dispose();
+  }
+
   Future<void> _requestNotificationPermissions() async {
     PermissionStatus status = await Permission.notification.request();
     if (status.isGranted) {
@@ -153,6 +167,7 @@ class _HomePageState extends State<HomePage> {
       }
     } catch (e) {}
   }
+
 
   @override
   Widget build(BuildContext context) {

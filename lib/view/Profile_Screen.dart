@@ -42,7 +42,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       body: FutureBuilder<DocumentSnapshot>(
         future: _userDataFuture,
-        builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+        builder:
+            (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           }
@@ -81,7 +82,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             imageUrl: imageUrl ?? '',
                             fit: BoxFit.cover,
                             placeholder: (context, url) => PlaceholderImage(),
-                            errorWidget: (context, url, error) => PlaceholderImage(),
+                            errorWidget: (context, url, error) =>
+                                PlaceholderImage(),
                           ),
                         ),
                       ),
@@ -106,12 +108,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   SizedBox(height: screenHeight * 0.02),
                   Text(
-                    userData['name'],
-                    style: TextStyle(fontSize: screenWidth * 0.06, fontWeight: FontWeight.bold),
+                    userData['name'] ?? 'No Data',
+                    style: TextStyle(
+                        fontSize: screenWidth * 0.06,
+                        fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: screenHeight * 0.01),
                   Text(
-                    userData['bio'],
+                    userData['bio'] ?? 'No Data',
                     style: TextStyle(fontSize: screenWidth * 0.04),
                     textAlign: TextAlign.center,
                   ),
@@ -120,7 +124,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ListTile(
                     leading: Icon(Icons.email),
                     title: Text(
-                      userData['email'],
+                      userData['email'] ?? 'No Data',
                       style: TextStyle(fontSize: screenWidth * 0.04),
                     ),
                   ),

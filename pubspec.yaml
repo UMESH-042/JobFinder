@@ -65,6 +65,7 @@ dependencies:
 
   feature_discovery: ^0.14.1
   showcaseview: ^2.0.3
+  timeago: ^3.3.0
 
 
 

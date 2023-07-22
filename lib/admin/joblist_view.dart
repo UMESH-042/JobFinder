@@ -33,7 +33,8 @@ class _AllJobsPageState extends State<AllJobsPage> {
       );
     }
   }
-   Future<void> confirmDeleteJob(String documentId) async {
+
+  Future<void> confirmDeleteJob(String documentId) async {
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -42,20 +43,45 @@ class _AllJobsPageState extends State<AllJobsPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel'),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: Colors.black),
+            ),
           ),
           TextButton(
             onPressed: () async {
               Navigator.pop(context); // Close the dialog
               await deleteJob(documentId); // Call the deleteJob function
             },
-            child: Text('Yes'),
+            child: Text(
+              'Yes',
+              style: TextStyle(color: Colors.red),
+            ),
           ),
         ],
       ),
     );
   }
-  
+
+  String getTimeDifferenceFromNow(Timestamp? timestamp) {
+    if (timestamp == null) {
+      // Handle the case where the timestamp is null
+      return 'No timestamp available';
+    }
+    final now = DateTime.now();
+    final time = timestamp.toDate();
+    final difference = now.difference(time);
+
+    if (difference.inDays > 0) {
+      return '${difference.inDays}d ago';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours}hr ago';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes}min ago';
+    } else {
+      return 'just now';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +96,7 @@ class _AllJobsPageState extends State<AllJobsPage> {
             child: TextField(
               onChanged: (value) {
                 setState(() {
-                  searchQuery = value.toLowerCase();
+                  searchQuery = value.toLowerCase(); // Convert to lowercase
                 });
               },
               decoration: InputDecoration(
@@ -113,10 +139,13 @@ class _AllJobsPageState extends State<AllJobsPage> {
                     }
 
                     final category =
+                        jobData['category']?.toString()?.toLowerCase() ??
+                            ''; // Convert to lowercase
+                    final category_exact =
                         jobData['category']?.toString() ?? '';
                     final companyName =
-                        jobData['companyDetails']?.toString()??
-                            '';
+                        jobData['companyDetails']?.toString()?.toLowerCase() ??
+                            ''; // Convert to lowercase
                     final containsSearchQuery =
                         category.contains(searchQuery) ||
                             companyName.contains(searchQuery);
@@ -135,6 +164,8 @@ class _AllJobsPageState extends State<AllJobsPage> {
                     final postedby = jobData['postedby'];
                     final noOfApplicants = jobData['NoOfApplicants'] ?? 0;
                     final CompanyName = jobData['companyDetails'];
+                    final timestamp = jobData['timestamp'] as Timestamp;
+                    final timeDifference = getTimeDifferenceFromNow(timestamp);
 
                     return GestureDetector(
                       onTap: () {
@@ -178,7 +209,7 @@ class _AllJobsPageState extends State<AllJobsPage> {
                                 )
                               : Icon(Icons.image, size: 60),
                           title: Text(
-                            category,
+                            category_exact,
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -202,8 +233,8 @@ class _AllJobsPageState extends State<AllJobsPage> {
                             icon: Icon(Icons.delete),
                             onPressed: () {
                               // deleteJob(jobSnapshot
-                                  // .id); // Call a function to delete the job post
-                                   confirmDeleteJob(jobSnapshot.id);
+                              // .id); // Call a function to delete the job post
+                              confirmDeleteJob(jobSnapshot.id);
                             },
                           ),
                         ),

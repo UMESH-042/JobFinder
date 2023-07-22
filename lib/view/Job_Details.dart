@@ -27,7 +27,8 @@ class JobDetailsPage extends StatefulWidget {
     required this.requirements,
     required this.postedby,
     required this.noOfApplicants,
-    required this.documentId, required this.CompanyName,
+    required this.documentId,
+    required this.CompanyName,
   });
 
   @override
@@ -89,7 +90,8 @@ class _JobDetailsPageState extends State<JobDetailsPage> {
 
       final Map<String, dynamic> messageData = {
         'sendBy': _auth.currentUser?.displayName,
-        'message': 'I am interested in your Company ${widget.CompanyName} to work as ${widget.category} and I am willing to work ${widget.jobtype}',
+        'message':
+            'I am interested in your Company ${widget.CompanyName} to work as ${widget.category} and I am willing to work ${widget.jobtype}',
         'time': FieldValue.serverTimestamp(),
       };
 
@@ -101,79 +103,163 @@ class _JobDetailsPageState extends State<JobDetailsPage> {
       throw e;
     }
   }
+
   Future<void> storeAppliedJob() async {
-  try {
-    String currentUserEmail = FirebaseAuth.instance.currentUser!.email!;
-    final appliedJobsRef = FirebaseFirestore.instance.collection('applied_jobs');
+    try {
+      String currentUserEmail = FirebaseAuth.instance.currentUser!.email!;
+      final appliedJobsRef =
+          FirebaseFirestore.instance.collection('applied_jobs');
 
-    await appliedJobsRef.add({
-      'user_email': currentUserEmail,
-      'job_details': {
-        'document_id': widget.documentId,
-        'location': widget.location,
-        'salary': widget.salary,
-        'category': widget.category,
-        'image': widget.image,
-        'jobtype': widget.jobtype,
-        'description': widget.description,
-        'requirements': widget.requirements,
-        'postedby': widget.postedby,
-        'noOfApplicants': widget.noOfApplicants,
-        'CompanyName': widget.CompanyName,
-      },
-      'timestamp': FieldValue.serverTimestamp(),
-    });
+      await appliedJobsRef.add({
+        'user_email': currentUserEmail,
+        'job_details': {
+          'document_id': widget.documentId,
+          'location': widget.location,
+          'salary': widget.salary,
+          'category': widget.category,
+          'image': widget.image,
+          'jobtype': widget.jobtype,
+          'description': widget.description,
+          'requirements': widget.requirements,
+          'postedby': widget.postedby,
+          'noOfApplicants': widget.noOfApplicants,
+          'CompanyName': widget.CompanyName,
+        },
+        'timestamp': FieldValue.serverTimestamp(),
+      });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Successfully applied for the job.'),
-        backgroundColor: Colors.green,
-      ),
-    );
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Failed to apply for the job. Please try again.'),
-        backgroundColor: Colors.red,
-      ),
-    );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(
+      //     content: Text('Successfully applied for the job.'),
+      //     backgroundColor: Colors.green,
+      //   ),
+      // );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to apply for the job. Please try again.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
-}
 
+  // Widget button(BuildContext context) {
+  //   return InkWell(
+  //     onTap: () async{
+  //       String currentUserEmail = FirebaseAuth.instance.currentUser!.email!;
+  //       setState(() {
+  //         _isLoading = true;
+  //       });
 
+  // await storeAppliedJob();
+  // Navigator.push(context, MaterialPageRoute(builder: (context)=>ApplicationFormScreen(documentId: widget.documentId, postedByEmail: widget.postedby)));
+
+  //       sendMessageToPostedByUser(currentUserEmail).then((_) {
+  //         ScaffoldMessenger.of(context).showSnackBar(
+  //           SnackBar(
+  //             content: Text('Successfully Applied'),
+  //             backgroundColor: Colors.green,
+  //           ),
+  //         );
+  //         setState(() {
+  //           _currentApplicants++; // Increase the value by one
+  //         });
+  //         // Navigator.pop(context);
+  //       }).catchError((error) {
+  //         ScaffoldMessenger.of(context).showSnackBar(
+  //           SnackBar(
+  //             content: Text('Application Failed'),
+  //             backgroundColor: Colors.red,
+  //           ),
+  //         );
+  //       }).whenComplete(() {
+  //         setState(() {
+  //           _isLoading = false;
+  //         });
+  //       });
+  //     },
+  //     child: Container(
+  //       margin: EdgeInsets.all(20),
+  //       width: MediaQuery.of(context).size.width,
+  //       height: 55,
+  //       decoration: BoxDecoration(
+  //         color: Color.fromARGB(255, 76, 175, 142),
+  //         borderRadius: BorderRadius.circular(15),
+  //       ),
+  //       child: Center(
+  //         child: _isLoading
+  //             ? SpinKitCircle(
+  //                 color: Colors.white,
+  //                 size: 25.0,
+  //               )
+  //             : Text(
+  //                 "Apply for Job",
+  //                 style: TextStyle(
+  //                   color: Colors.white,
+  //                   fontWeight: FontWeight.bold,
+  //                   fontSize: 17,
+  //                 ),
+  //               ),
+  //       ),
+  //     ),
+  //   );
+  // }
   Widget button(BuildContext context) {
     return InkWell(
-      onTap: () async{
+      onTap: () async {
         String currentUserEmail = FirebaseAuth.instance.currentUser!.email!;
         setState(() {
           _isLoading = true;
         });
 
-  await storeAppliedJob();
-  Navigator.push(context, MaterialPageRoute(builder: (context)=>ApplicationFormScreen(documentId: widget.documentId, postedByEmail: widget.postedby)));
-        
-        sendMessageToPostedByUser(currentUserEmail).then((_) {
+        await storeAppliedJob();
+
+        // Navigate to ApplicationFormScreen and wait for the result
+        final applicationResult = await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ApplicationFormScreen(
+              documentId: widget.documentId,
+              postedByEmail: widget.postedby,
+            ),
+          ),
+        );
+
+        // Check the result returned from the ApplicationFormScreen
+        if (applicationResult == true) {
+          // Application was successfully submitted
+          sendMessageToPostedByUser(currentUserEmail).then((_) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Successfully Applied'),
+                backgroundColor: Colors.green,
+              ),
+            );
+            setState(() {
+              _currentApplicants++; // Increase the value by one
+            });
+            Navigator.pop(context);
+          }).catchError((error) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Application Failed'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          });
+        } else {
+          // Application was not submitted or an error occurred
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Successfully Applied'),
-              backgroundColor: Colors.green,
+              content: Text('Application Canceled'),
+              backgroundColor: Colors.orange,
             ),
           );
-          setState(() {
-            _currentApplicants++; // Increase the value by one
-          });
-          // Navigator.pop(context);
-        }).catchError((error) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Application Failed'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }).whenComplete(() {
-          setState(() {
-            _isLoading = false;
-          });
+        }
+
+        setState(() {
+          _isLoading = false;
         });
       },
       child: Container(
