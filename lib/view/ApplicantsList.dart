@@ -5,6 +5,7 @@ import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:path/path.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vuna__gigs/admin/UserAdminChatRoom.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 class ApplicantsListScreen extends StatelessWidget {
   final String postedByEmail;
@@ -42,35 +43,123 @@ class ApplicantsListScreen extends StatelessWidget {
           if (filteredApplicants.isEmpty) {
             return Center(child: Text('No applicants found'));
           }
-
+        //    filteredApplicants.sort((a, b) {
+        //   final timestampA = a['timestamp'] as Timestamp;
+        //   final timestampB = b['timestamp'] as Timestamp;
+        //   return timestampA.compareTo(timestampB);
+        // });
+        filteredApplicants.sort((a, b) {
+          final timestampA = a['timestamp'] as Timestamp;
+          final timestampB = b['timestamp'] as Timestamp;
+          return timestampB.compareTo(timestampA); // Reverse the order for most recent first
+        });
           return ListView.builder(
             itemCount: filteredApplicants.length,
             itemBuilder: (context, index) {
               final applicant = filteredApplicants[index];
               final applicantData = applicant.data() as Map<String, dynamic>;
-              print(applicantData['cv_url']);
-              return Card(
-                elevation: 2,
-                margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: ListTile(
-                  title: Text(
-                      '${applicantData['first_name']} ${applicantData['last_name']}'),
-                  subtitle: Text(applicantData['email']),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        onPressed: () async {
-                          String cvUrl = applicantData['cv_url'];
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      PdfViewer(PdfUrl: cvUrl)));
-                        },
-                        icon: Icon(Icons.picture_as_pdf),
+              final timestamp = applicantData['timestamp'] as Timestamp;
+              final timeAgo = timeago.format(
+                  timestamp.toDate()); // Calculate time ago from timestamp
+              final first_name = applicantData['first_name'];
+              final last_name = applicantData['last_name'];
+              final email = applicantData['email'];
+              final applicant_email = applicantData['applicant_email'];
+              final cv_url = applicantData['cv_url'];
+              final message = applicantData['message'];
+              final job_document_id = applicantData['job_document_id'];
+              print(first_name);
+              print(last_name);
+              print(email);
+              print(message);
+              print(cv_url);
+              return Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Card(
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  elevation: 4,
+                  child: ListTile(
+                    onTap: () async {
+                      final jobSnapshot = await FirebaseFirestore.instance
+                          .collection('jobs')
+                          .doc(job_document_id)
+                          .get();
+                      final jobData =
+                          jobSnapshot.data() as Map<String, dynamic>;
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ApplicantDetailsScreen(
+                            firstName: first_name,
+                            lastName: last_name,
+                            email: email,
+                            message: message,
+                            jobDetails:
+                                jobData, // Pass job details to the ApplicantDetailsScreen
+                            // Pass any other relevant data fields here
+                          ),
+                        ),
+                      );
+                    },
+                    leading: CircleAvatar(
+                      backgroundColor: Colors.grey,
+                      child: Text(
+                        '${first_name[0]}${last_name[0]}',
+                        style: TextStyle(color: Colors.white),
                       ),
-                    ],
+                    ),
+                    title: Text(
+                      '$first_name $last_name',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          email,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            Icon(Icons.access_time),
+                            SizedBox(width: 4),
+                            Text(
+                              'Applied $timeAgo',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          onPressed: () async {
+                            String cvUrl = applicantData['cv_url'];
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        PdfViewer(PdfUrl: cvUrl)));
+                          },
+                          icon: Icon(Icons.picture_as_pdf),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );
@@ -95,6 +184,107 @@ class PDFViewerScreen extends StatelessWidget {
       ),
       body: PDFView(
         filePath: pdfUrl,
+      ),
+    );
+  }
+}
+
+
+class ApplicantDetailsScreen extends StatelessWidget {
+  final String firstName;
+  final String lastName;
+  final String email;
+  final String message;
+  final Map<String, dynamic> jobDetails; // Add jobDetails field
+
+  ApplicantDetailsScreen({
+    required this.firstName,
+    required this.lastName,
+    required this.email,
+    required this.message,
+    required this.jobDetails, // Initialize jobDetails
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final category = jobDetails['category'];
+    final companyDetails = jobDetails['companyDetails'];
+    final jobSalary = jobDetails['salary'];
+    final jobLocation = jobDetails['location'];
+    final jobType = jobDetails['jobtype'];
+    // Add other job details you want to display
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Applicant Details'),
+        backgroundColor: Color.fromARGB(255, 76, 175, 142), // Customize the app bar color
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '$firstName $lastName',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Email: $email',
+              style: TextStyle(fontSize: 18, color: Colors.grey[800]),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Message:',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text(
+              message,
+              style: TextStyle(fontSize: 18),
+            ),
+            SizedBox(height: 24),
+            Text(
+              'Job Details:',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            ListTile(
+              leading: Icon(Icons.work, size: 28, color: Colors.blue),
+              title: Text(
+                category,
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    jobType,
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  Text(
+                    'Location: $jobLocation',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  Text(
+                    'Salary: $jobSalary',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Company Name:',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text(
+              companyDetails,
+              style: TextStyle(fontSize: 18),
+            ),
+          ],
+        ),
       ),
     );
   }

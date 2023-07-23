@@ -62,19 +62,19 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
   }
 
   void _submitApplication() async {
-      if (_firstNameController.text.isEmpty ||
-      _lastNameController.text.isEmpty ||
-      _emailController.text.isEmpty ||
-      _messageController.text.isEmpty ||
-      _cvFile == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Please fill all the fields and upload a CV.'),
-        backgroundColor: Colors.red,
-      ),
-    );
-    return;
-  }
+    if (_firstNameController.text.isEmpty ||
+        _lastNameController.text.isEmpty ||
+        _emailController.text.isEmpty ||
+        _messageController.text.isEmpty ||
+        _cvFile == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please fill all the fields and upload a CV.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
     setState(() {
       _isSubmitting = true;
     });
@@ -110,6 +110,7 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
         'message': message,
         'cv_url':
             cvUrl, // Storing the CV URL along with other applicant details.
+        'timestamp': FieldValue.serverTimestamp(),
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -152,22 +153,18 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
             SizedBox(height: 10),
             firstname(),
             SizedBox(height: 20),
-
             label("Last Name"),
             SizedBox(height: 10),
             lastname(),
             SizedBox(height: 20),
-
             label("Email"),
             SizedBox(height: 10),
             useremail(),
             SizedBox(height: 20),
-
             label("Message"),
             SizedBox(height: 10),
             message(),
             SizedBox(height: 20),
-
             cvUploadField(),
             SizedBox(height: 20),
             _isSubmitting ? _buildSubmittingIndicator() : button(),
@@ -335,12 +332,12 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
     );
   }
 
-Widget _buildSubmittingIndicator() {
-  return SpinKitCircle(
-    color: Colors.green, // You can change the color as desired
-    size: 50.0,
-  );
-}
+  Widget _buildSubmittingIndicator() {
+    return SpinKitCircle(
+      color: Colors.green, // You can change the color as desired
+      size: 50.0,
+    );
+  }
 
   Widget label(String label) {
     return Padding(
