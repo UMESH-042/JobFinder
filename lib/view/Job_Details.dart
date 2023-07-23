@@ -219,12 +219,12 @@ class _JobDetailsPageState extends State<JobDetailsPage> {
         if (applicationResult == true) {
           // Application was successfully submitted
           sendMessageToPostedByUser(currentUserEmail).then((_) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Successfully Applied'),
-                backgroundColor: Colors.green,
-              ),
-            );
+            // ScaffoldMessenger.of(context).showSnackBar(
+            //   SnackBar(
+            //     content: Text('Successfully Applied'),
+            //     backgroundColor: Colors.green,
+            //   ),
+            // );
             setState(() {
               _currentApplicants++; // Increase the value by one
             });
