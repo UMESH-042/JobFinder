@@ -55,16 +55,17 @@ class _HomePageState extends State<HomePage> {
         .doc(FirebaseAuth.instance.currentUser!.uid)
         .set({'token': token}, SetOptions(merge: true));
   }
+
   StreamSubscription<RemoteMessage>? _firebaseMessagingStream;
 
   @override
   void initState() {
     super.initState();
     FirebaseMessaging.instance.getInitialMessage();
-      // FirebaseMessaging.onMessage.listen((event) {
-      //   LocalNotificationService.display(event);
-      // });
-         _firebaseMessagingStream = FirebaseMessaging.onMessage.listen((event) {
+    // FirebaseMessaging.onMessage.listen((event) {
+    //   LocalNotificationService.display(event);
+    // });
+    _firebaseMessagingStream = FirebaseMessaging.onMessage.listen((event) {
       LocalNotificationService.display(event);
     });
 
@@ -87,7 +88,9 @@ class _HomePageState extends State<HomePage> {
       JobListPage(),
       ChatScreen(currentUserEmail: widget.currentUserEmail),
       ProfileScreen(useremail: currentUID!),
-      ApplicantsListScreen(postedByEmail: widget.currentUserEmail,),
+      ApplicantsListScreen(
+        postedByEmail: widget.currentUserEmail,
+      ),
     ];
 
     Future.delayed(Duration(seconds: 2), () {
@@ -113,11 +116,10 @@ class _HomePageState extends State<HomePage> {
     _requestNotificationPermissions();
   }
 
-
-   @override
+  @override
   void dispose() {
     // ... Your other code ...
-    
+
     _firebaseMessagingStream?.cancel();
     super.dispose();
   }
@@ -167,7 +169,6 @@ class _HomePageState extends State<HomePage> {
       }
     } catch (e) {}
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -281,7 +282,9 @@ class _HomePageState extends State<HomePage> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => MyApplicationPage(currentUserEmail: widget.currentUserEmail,)));
+                                builder: (context) => MyApplicationPage(
+                                      currentUserEmail: widget.currentUserEmail,
+                                    )));
                       },
                     ),
                     SizedBox(height: 10),
@@ -374,8 +377,8 @@ class _HomePageState extends State<HomePage> {
             items: [
               Icon(Icons.home),
               Icon(Icons.chat_outlined),
-              Icon(Icons.person),
-              Icon(Icons.settings),
+              Icon(Icons.portrait_outlined),
+              Icon(Icons.people_outlined),
             ],
             onTap: (index) {
               setState(() {

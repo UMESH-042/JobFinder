@@ -62,10 +62,10 @@ dependencies:
   flutter_paystack: ^1.0.7
   cached_network_image: ^3.2.3
   shared_preferences: ^2.2.0
-
-  feature_discovery: ^0.14.1
-  showcaseview: ^2.0.3
   timeago: ^3.3.0
+  showcaseview: ^2.0.3
+
+
 
 
 
