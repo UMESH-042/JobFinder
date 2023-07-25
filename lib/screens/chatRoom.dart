@@ -9,6 +9,7 @@ import 'package:uuid/uuid.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:vuna__gigs/CallingFeature/CallPage.dart';
 import 'package:vuna__gigs/view/ChatScreen.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
@@ -101,7 +102,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
           String? token =
               await getNotificationTokenForUser(widget.otherUserEmail);
           if (token != null) {
-            sendNotification(currentUsername!,message, token);
+            sendNotification(currentUsername!, message, token);
             print('Notification successful!');
           } else {
             print('Notification Failed!');
@@ -213,44 +214,43 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
 //   }
 // }
 
-sendNotification(String userName, String message, String token) async {
-  final data = {
-    'click_action': 'FLUTTER_NOTIFICATION_CLICK',
-    'id': '1',
-    'status': 'done',
-    'userName': userName,
-    'message': message,
-  };
+  sendNotification(String userName, String message, String token) async {
+    final data = {
+      'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+      'id': '1',
+      'status': 'done',
+      'userName': userName,
+      'message': message,
+    };
 
-  try {
-    http.Response response = await http.post(
-      Uri.parse('https://fcm.googleapis.com/fcm/send'),
-      headers: <String, String>{
-        'Content-Type': 'application/json',
-        'Authorization':
-            'key=AAAA6msbZ3E:APA91bHFliFq8amgNOiLnltmuo2AxFHnxfLoFk6uVeSf1LEH7jti-i7l-jtiuFZN61koUeAC94Wa_ckPSE5Ao8xFfK_fiDxtV4sArdob_scjxoVcqXnBTulJ_SH6tE48u0RJGiZyEV_p'
-      },
-      body: jsonEncode(<String, dynamic>{
-        'notification': <String, dynamic>{
-          'title': '$userName: $message',
-          'body': '',
+    try {
+      http.Response response = await http.post(
+        Uri.parse('https://fcm.googleapis.com/fcm/send'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization':
+              'key=AAAA6msbZ3E:APA91bHFliFq8amgNOiLnltmuo2AxFHnxfLoFk6uVeSf1LEH7jti-i7l-jtiuFZN61koUeAC94Wa_ckPSE5Ao8xFfK_fiDxtV4sArdob_scjxoVcqXnBTulJ_SH6tE48u0RJGiZyEV_p'
         },
-        'priority': 'high',
-        'data': data,
-        'to': '$token',
-      }),
-    );
+        body: jsonEncode(<String, dynamic>{
+          'notification': <String, dynamic>{
+            'title': '$userName: $message',
+            'body': '',
+          },
+          'priority': 'high',
+          'data': data,
+          'to': '$token',
+        }),
+      );
 
-    if (response.statusCode == 200) {
-      print("Notification sent successfully");
-    } else {
-      print("Error sending notification");
+      if (response.statusCode == 200) {
+        print("Notification sent successfully");
+      } else {
+        print("Error sending notification");
+      }
+    } catch (e) {
+      print("Error: $e");
     }
-  } catch (e) {
-    print("Error: $e");
   }
-}
-
 
   void replyToMessage(String message) {
     setState(() {
@@ -381,9 +381,14 @@ sendNotification(String userName, String message, String token) async {
             }
           },
         ),
+    
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () async{
+                String? recipientToken = await getNotificationTokenForUser(widget.otherUserEmail);
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => CallIDPage(recipientToken: recipientToken,)));
+            },
             icon: Icon(Icons.phone),
             color: Colors.black,
           )
