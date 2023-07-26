@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -11,7 +10,8 @@ final String localUserID = math.Random().nextInt(10000).toString();
 class CallIDPage extends StatelessWidget {
   final callIDTextCtrl = TextEditingController();
   final String? recipientToken;
-  CallIDPage({super.key,this.recipientToken});
+  final String userName;
+  CallIDPage({super.key, this.recipientToken, required this.userName});
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +32,7 @@ class CallIDPage extends StatelessWidget {
               ElevatedButton(
                 onPressed: () async {
                   // Instead of directly navigating to the CallPage, send the call invitation through push notification.
-                  await sendCallInvitation(callIDTextCtrl.text,recipientToken);
+                  await sendCallInvitation(callIDTextCtrl.text, recipientToken,userName);
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
                     return CallPage(callID: callIDTextCtrl.text);
                   }));
@@ -62,7 +62,8 @@ class CallIDPage extends StatelessWidget {
   }
 
   // Function to send the call invitation through push notification.
-  Future<void> sendCallInvitation(String callID,String? recipientDeviceToken) async {
+  Future<void> sendCallInvitation(
+      String callID, String? recipientDeviceToken,String userName) async {
     // String? recipientDeviceToken =
     //     "e-AWdZ7KR2GjBwOMujsPjf:APA91bHaPmD3pR4-pEsEQXdRiBO0ANGc2cYkFgZf5XAZB69hCqBtds35aifsv4N_jrgoHw_n-_4xhnLuR_m7fjVaqzZp_iFNucc4pdP64oA0pCDH1QQ52xSpDcHaIi9-tHCieeeGBLpS";
 
@@ -73,7 +74,7 @@ class CallIDPage extends StatelessWidget {
     }
 
     // Send the push notification for the call invitation to the recipient's device.
-    await sendCallInvitationNotification(recipientDeviceToken, callID);
+    await sendCallInvitationNotification(recipientDeviceToken, callID,userName);
 
     // Print a message for demonstration purposes.
     print('Call invitation sent successfully!');
@@ -81,7 +82,7 @@ class CallIDPage extends StatelessWidget {
 
   // Function to send the push notification for the call invitation to the recipient's device.
   Future<void> sendCallInvitationNotification(
-      String recipientDeviceToken, String callID) async {
+      String recipientDeviceToken, String callID,String userName) async {
     // Replace 'your_server_endpoint' with your server-side endpoint for sending push notifications.
     String serverEndpoint = 'https://fcm.googleapis.com/fcm/send';
 
@@ -92,7 +93,7 @@ class CallIDPage extends StatelessWidget {
     // Create the request body with the recipient device token and call ID.
     Map<String, dynamic> requestBody = {
       'notification': {
-        'title': 'Incoming Call',
+        'title': 'Incoming Call from ${userName}',
         'body': 'You have an incoming call!',
         'click_action': 'FLUTTER_NOTIFICATION_CLICK',
       },

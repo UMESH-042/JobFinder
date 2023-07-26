@@ -38,6 +38,7 @@ void _navigateToCallPage(String callID) {
 }
 
 class MyApp extends StatelessWidget {
+  
   const MyApp({super.key});
 
   @override

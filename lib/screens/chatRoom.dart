@@ -387,7 +387,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
             onPressed: () async{
                 String? recipientToken = await getNotificationTokenForUser(widget.otherUserEmail);
               Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => CallIDPage(recipientToken: recipientToken,)));
+                  MaterialPageRoute(builder: (context) => CallIDPage(recipientToken: recipientToken, userName:_auth.currentUser?.displayName ?? '',)));
             },
             icon: Icon(Icons.phone),
             color: Colors.black,
