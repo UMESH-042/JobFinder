@@ -808,6 +808,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:showcaseview/showcaseview.dart';
 import 'package:vuna__gigs/screens/forgot_password.dart';
 import 'package:vuna__gigs/screens/signup_screen.dart';
 import 'package:vuna__gigs/admin/AdminHomesScreen.dart';
@@ -921,15 +922,28 @@ class _LoginScreenState extends State<LoginScreen> {
           } else if (userType == 'user') {
             // Navigate to HomeScreen
             print('Login As User');
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (_) => HomePage(
-                  currentUserEmail: email,
-                  requiresProfileSetup: true,
-                ),
-              ),
-            );
+            // Navigator.pushReplacement(
+            //   context,
+            //   MaterialPageRoute(
+            //     builder: (_) => HomePage(
+            //       currentUserEmail: email,
+            //       requiresProfileSetup: true,
+            //     ),
+            //   ),
+            // );
+             Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ShowCaseWidget(
+          builder: Builder(
+            builder: (context) => HomePage(
+              currentUserEmail: email,
+              requiresProfileSetup: true,
+            ),
+          ),
+        ),
+      ),
+    );
           } else {
             print("Invalid UserType");
           }
@@ -1240,15 +1254,28 @@ class _LoginScreenState extends State<LoginScreen> {
         } else if (userType == 'user') {
           // Navigate to HomeScreen
           print('Login As User');
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (_) => HomePage(
-                currentUserEmail: user.email!,
-                requiresProfileSetup: true,
-              ),
+          // Navigator.pushReplacement(
+          //   context,
+          //   MaterialPageRoute(
+          //     builder: (_) => HomePage(
+          //       currentUserEmail: user.email!,
+          //       requiresProfileSetup: true,
+          //     ),
+          //   ),
+          // );
+           Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ShowCaseWidget(
+          builder: Builder(
+            builder: (context) => HomePage(
+              currentUserEmail: user.email!,
+              requiresProfileSetup: true,
             ),
-          );
+          ),
+        ),
+      ),
+    );
         } else {
           print("Invalid UserType");
         }
@@ -1328,15 +1355,28 @@ class _LoginScreenState extends State<LoginScreen> {
                   } else if (userType == 'user') {
                     // Navigate to HomeScreen
                     print('Login As User');
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => HomePage(
-                          currentUserEmail: _email.text,
-                          requiresProfileSetup: true,
-                        ),
-                      ),
-                    );
+                    // Navigator.pushReplacement(
+                    //   context,
+                    //   MaterialPageRoute(
+                    //     builder: (_) => HomePage(
+                    //       currentUserEmail: _email.text,
+                    //       requiresProfileSetup: true,
+                    //     ),
+                    //   ),
+                    // );
+                     Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ShowCaseWidget(
+          builder: Builder(
+            builder: (context) => HomePage(
+              currentUserEmail: _email.text,
+              requiresProfileSetup: true,
+            ),
+          ),
+        ),
+      ),
+    );
                   } else {
                     print("Invalid UserType");
                   }

@@ -62,8 +62,10 @@ dependencies:
   flutter_paystack: ^1.0.7
   cached_network_image: ^3.2.3
   timeago: ^3.3.0
-  showcaseview: ^2.0.3
   zego_uikit_prebuilt_call: ^3.1.1
+  showcaseview: ^2.0.3
+  shared_preferences: ^2.2.0
+
 
 
 
@@ -95,6 +97,7 @@ flutter:
     - assets/facebook_logo.png
     - assets/google_logo.png
     - assets/landingimage.jpg
+    - assets/vunaGigs_logo.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

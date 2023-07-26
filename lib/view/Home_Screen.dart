@@ -12,7 +12,9 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:showcaseview/showcaseview.dart';
 import 'package:vuna__gigs/notification/notification_service.dart';
 import 'package:vuna__gigs/view/MyApplications.dart';
 import 'package:vuna__gigs/view/add_jobs.dart';
@@ -45,6 +47,12 @@ class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
   bool isLoading = true;
   String? _imageUrl;
+  final keyone = GlobalKey();
+  final keytwo = GlobalKey();
+  final keyHome = GlobalKey();
+  final keyChat = GlobalKey();
+  final keyprofile = GlobalKey();
+  final keyApplicants = GlobalKey();
 
   List<Widget> _screens = [];
 
@@ -62,6 +70,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     FirebaseMessaging.instance.getInitialMessage();
+
     // FirebaseMessaging.onMessage.listen((event) {
     //   LocalNotificationService.display(event);
     // });
@@ -112,8 +121,26 @@ class _HomePageState extends State<HomePage> {
         );
       });
     }
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   ShowCaseWidget.of(context).startShowCase([keyone, keytwo,keyChat,keyprofile,keyApplicants]);
+    // });
+    _checkShowcaseStatus();
 
     _requestNotificationPermissions();
+  }
+
+  Future<void> _checkShowcaseStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool showcaseShown = prefs.getBool('showcase_shown') ?? false;
+
+    if (!showcaseShown) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ShowCaseWidget.of(context).startShowCase([keyone, keytwo,]);
+
+        // Mark showcase as shown
+        prefs.setBool('showcase_shown', true);
+      });
+    }
   }
 
   @override
@@ -180,29 +207,34 @@ class _HomePageState extends State<HomePage> {
           ? AppBar(
               backgroundColor: Colors.transparent,
               elevation: 0,
-              leading: Builder(
-                builder: (BuildContext context) {
-                  return Container(
-                    margin: EdgeInsets.only(left: 17),
-                    child: IconButton(
-                      padding: EdgeInsets.all(0),
-                      icon: ClipRRect(
-                        borderRadius: BorderRadius.circular(9),
-                        child: Container(
-                          color: Color.fromARGB(255, 76, 175, 142),
-                          child: Icon(
-                            Icons.menu,
-                            color: Colors.white,
-                            size: 40,
+              leading: Showcase(
+                key: keyone,
+                description: "Tap to open Various Options",
+                child: Builder(
+                  builder: (BuildContext context) {
+                    return Container(
+                      margin: EdgeInsets.only(left: 3),
+                      // margin: EdgeInsets.only(left: 17),
+                      child: IconButton(
+                        padding: EdgeInsets.all(0),
+                        icon: ClipRRect(
+                          borderRadius: BorderRadius.circular(9),
+                          child: Container(
+                            color: Color.fromARGB(255, 76, 175, 142),
+                            child: Icon(
+                              Icons.menu,
+                              color: Colors.white,
+                              size: 40,
+                            ),
                           ),
                         ),
+                        onPressed: () {
+                          Scaffold.of(context).openDrawer();
+                        },
                       ),
-                      onPressed: () {
-                        Scaffold.of(context).openDrawer();
-                      },
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
               actions: [
                 Container(
@@ -375,10 +407,21 @@ class _HomePageState extends State<HomePage> {
             animationDuration: Duration(milliseconds: 300),
             index: _currentIndex,
             items: [
-              Icon(Icons.home),
-              Icon(Icons.chat_outlined),
-              Icon(Icons.portrait_outlined),
-              Icon(Icons.people_outlined),
+              
+                 Icon(Icons.home),
+
+              Showcase(
+                key: keyChat,
+                description: "Chat",
+                child: Icon(Icons.chat_outlined),
+              ),
+              Showcase(
+                key: keyprofile,
+                description: "View Profile",
+                child: Icon(Icons.portrait_outlined),
+              ),
+              Showcase(key: keyApplicants, description: "Applicant List", child: 
+              Icon(Icons.people_outlined),),
             ],
             onTap: (index) {
               setState(() {
@@ -389,20 +432,23 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       floatingActionButton: _currentIndex == 0
-          ? FloatingActionButton(
-              backgroundColor: Color.fromARGB(255, 76, 175, 142),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => AddJobs(
-                      otherUserEmail: widget.currentUserEmail,
+          ? Showcase(
+              key: keytwo,
+              description: "Tap to Add Jobs",
+              child: FloatingActionButton(
+                backgroundColor: Color.fromARGB(255, 76, 175, 142),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AddJobs(
+                        otherUserEmail: widget.currentUserEmail,
+                      ),
                     ),
-                  ),
-                );
-              },
-              child: Icon(Icons.add),
-            )
+                  );
+                },
+                child: Icon(Icons.add),
+              ))
           : null,
     );
   }

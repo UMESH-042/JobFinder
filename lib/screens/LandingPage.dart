@@ -82,3 +82,35 @@ Widget customButton(BuildContext context, Size size) {
     ),
   );
 }
+
+
+class SplashScreen extends StatefulWidget {
+  @override
+  _SplashScreenState createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Add any initialization tasks here if needed
+    // For example, you can load data from an API, perform async tasks, etc.
+    // After completion, navigate to the next screen using Navigator.pushReplacement
+    Future.delayed(Duration(seconds: 2), () {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LandingPage()),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        // child: FlutterLogo(size: 150),
+        child: Image.asset('assets/vunaGigs_logo.jpeg', width: 200, height: 200),
+      ),
+    );
+  }
+}
