@@ -828,6 +828,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _password = TextEditingController();
   bool isloading = false;
   bool _obscurePassword = true;
+  late AnimationController _snackBarController;
+  late Animation<double> _snackBarAnimation;
 
   Future<String?> checkUserStatus(String email) async {
     final snapshot = await FirebaseFirestore.instance
@@ -850,10 +852,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // Variable to check if the user is already logged in.
   bool isLoggedIn = false;
+  bool _isLoggingIn = false;
 
   @override
   void initState() {
     _obscurePassword = true;
+
     super.initState();
     // Check if the user is already logged in using authStateChanges()
     _auth.authStateChanges().listen((User? user) {
@@ -876,6 +880,9 @@ class _LoginScreenState extends State<LoginScreen> {
     if (isLoggedIn) {
       // Get the current user's email
       final String email = _auth.currentUser!.email!;
+      if (_isLoggingIn) return; // If already logging in, do nothing
+
+      _isLoggingIn = true;
 
       showDialog(
         context: context,
@@ -896,6 +903,7 @@ class _LoginScreenState extends State<LoginScreen> {
       final status = await checkUserStatus(email);
       Navigator.pop(context); // Close the AlertDialog
 
+      _isLoggingIn = false;
       if (status == 'Blocked') {
         // Show a blocked SnackBar
         final snackBar = SnackBar(content: Text('You are blocked'));
@@ -922,36 +930,27 @@ class _LoginScreenState extends State<LoginScreen> {
           } else if (userType == 'user') {
             // Navigate to HomeScreen
             print('Login As User');
-            // Navigator.pushReplacement(
-            //   context,
-            //   MaterialPageRoute(
-            //     builder: (_) => HomePage(
-            //       currentUserEmail: email,
-            //       requiresProfileSetup: true,
-            //     ),
-            //   ),
-            // );
-             Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ShowCaseWidget(
-          builder: Builder(
-            builder: (context) => HomePage(
-              currentUserEmail: email,
-              requiresProfileSetup: true,
-            ),
-          ),
-        ),
-      ),
-    );
+
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ShowCaseWidget(
+                  builder: Builder(
+                    builder: (context) => HomePage(
+                      currentUserEmail: email,
+                      requiresProfileSetup: true,
+                    ),
+                  ),
+                ),
+              ),
+            );
           } else {
             print("Invalid UserType");
           }
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Login Successful!')),
+          );
         });
-
-        // Show a success SnackBar
-        final snackBar = SnackBar(content: Text('Login Successful'));
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
         _clearFields();
       }
@@ -1139,10 +1138,12 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _handleGoogleSignIn() async {
+    if (_isLoggingIn) return;
     if (!mounted) return;
     setState(() {
       isloading = true;
     });
+    _isLoggingIn = true;
 
     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
     if (googleUser != null) {
@@ -1205,6 +1206,7 @@ class _LoginScreenState extends State<LoginScreen> {
       final snackBar = SnackBar(content: Text('Google Sign-In Aborted'));
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
+    _isLoggingIn = false;
   }
 
   Future<void> storeUserDataInFirestore(User user) async {
@@ -1254,36 +1256,26 @@ class _LoginScreenState extends State<LoginScreen> {
         } else if (userType == 'user') {
           // Navigate to HomeScreen
           print('Login As User');
-          // Navigator.pushReplacement(
-          //   context,
-          //   MaterialPageRoute(
-          //     builder: (_) => HomePage(
-          //       currentUserEmail: user.email!,
-          //       requiresProfileSetup: true,
-          //     ),
-          //   ),
-          // );
-           Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ShowCaseWidget(
-          builder: Builder(
-            builder: (context) => HomePage(
-              currentUserEmail: user.email!,
-              requiresProfileSetup: true,
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ShowCaseWidget(
+                builder: Builder(
+                  builder: (context) => HomePage(
+                    currentUserEmail: user.email!,
+                    requiresProfileSetup: true,
+                  ),
+                ),
+              ),
             ),
-          ),
-        ),
-      ),
-    );
+          );
         } else {
           print("Invalid UserType");
         }
+         ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Login Successful!')),
+                  );
       });
-
-      // Show a success SnackBar
-      final snackBar = SnackBar(content: Text('Login Successful'));
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
       _clearFields();
     } catch (e) {
@@ -1298,6 +1290,8 @@ class _LoginScreenState extends State<LoginScreen> {
     return GestureDetector(
       onTap: () async {
         if (_email.text.isNotEmpty && _password.text.isNotEmpty) {
+          if (_isLoggingIn) return;
+
           setState(() {
             isloading = true;
           });
@@ -1319,8 +1313,9 @@ class _LoginScreenState extends State<LoginScreen> {
           );
 
           final status = await checkUserStatus(_email.text);
-
           Navigator.pop(context); // Close the AlertDialog
+          // Reset the flag to false after the login process is completed
+          _isLoggingIn = false;
 
           if (status == 'Blocked') {
             setState(() {
@@ -1355,36 +1350,25 @@ class _LoginScreenState extends State<LoginScreen> {
                   } else if (userType == 'user') {
                     // Navigate to HomeScreen
                     print('Login As User');
-                    // Navigator.pushReplacement(
-                    //   context,
-                    //   MaterialPageRoute(
-                    //     builder: (_) => HomePage(
-                    //       currentUserEmail: _email.text,
-                    //       requiresProfileSetup: true,
-                    //     ),
-                    //   ),
-                    // );
-                     Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ShowCaseWidget(
-          builder: Builder(
-            builder: (context) => HomePage(
-              currentUserEmail: _email.text,
-              requiresProfileSetup: true,
-            ),
-          ),
-        ),
-      ),
-    );
+
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ShowCaseWidget(
+                          builder: Builder(
+                            builder: (context) => HomePage(
+                              currentUserEmail: _email.text,
+                              requiresProfileSetup: true,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
                   } else {
                     print("Invalid UserType");
                   }
+                 
                 });
-
-                // Show a success SnackBar
-                final snackBar = SnackBar(content: Text('Login Successful'));
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
                 _clearFields();
               } else {

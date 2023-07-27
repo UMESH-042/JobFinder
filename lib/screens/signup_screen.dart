@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:showcaseview/showcaseview.dart';
 import 'package:vuna__gigs/screens/login_screen.dart';
 import 'package:vuna__gigs/screens/methods.dart';
 
@@ -218,15 +219,19 @@ class _CreateAccountState extends State<CreateAccount> {
               print("Account Created Successfully");
               showSnackBar("Account Created Successfully");
               _clearFields();
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => HomePage(
-                    currentUserEmail: _email.text,
-                    requiresProfileSetup: true,
-                  ),
-                ),
-              );
+                   Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ShowCaseWidget(
+          builder: Builder(
+            builder: (context) => HomePage(
+              currentUserEmail: user.email!,
+              requiresProfileSetup: true,
+            ),
+          ),
+        ),
+      ),
+    );
             } else {
               print("Account Creation Failed");
               setState(() {

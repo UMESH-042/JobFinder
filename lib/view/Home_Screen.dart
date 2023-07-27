@@ -47,12 +47,12 @@ class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
   bool isLoading = true;
   String? _imageUrl;
-  final keyone = GlobalKey();
-  final keytwo = GlobalKey();
-  final keyHome = GlobalKey();
-  final keyChat = GlobalKey();
-  final keyprofile = GlobalKey();
-  final keyApplicants = GlobalKey();
+  final GlobalKey _one = GlobalKey();
+  final GlobalKey _two = GlobalKey();
+  final GlobalKey _three = GlobalKey();
+  final GlobalKey _four = GlobalKey();
+  final GlobalKey _five = GlobalKey();
+  final GlobalKey _six = GlobalKey();
 
   List<Widget> _screens = [];
 
@@ -108,19 +108,6 @@ class _HomePageState extends State<HomePage> {
       });
     });
 
-    if (widget.requiresProfileSetup) {
-      WidgetsBinding.instance?.addPostFrameCallback((_) {
-        Fluttertoast.showToast(
-          msg: "Please set up your profile first.",
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.black87,
-          textColor: Colors.white,
-          fontSize: 16.0,
-        );
-      });
-    }
     // WidgetsBinding.instance.addPostFrameCallback((_) {
     //   ShowCaseWidget.of(context).startShowCase([keyone, keytwo,keyChat,keyprofile,keyApplicants]);
     // });
@@ -135,7 +122,8 @@ class _HomePageState extends State<HomePage> {
 
     if (!showcaseShown) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ShowCaseWidget.of(context).startShowCase([keyone, keytwo,]);
+        ShowCaseWidget.of(context)
+            .startShowCase([_one, _two, _three, _four, _five]);
 
         // Mark showcase as shown
         prefs.setBool('showcase_shown', true);
@@ -208,7 +196,7 @@ class _HomePageState extends State<HomePage> {
               backgroundColor: Colors.transparent,
               elevation: 0,
               leading: Showcase(
-                key: keyone,
+                key: _one,
                 description: "Tap to open Various Options",
                 child: Builder(
                   builder: (BuildContext context) {
@@ -407,21 +395,22 @@ class _HomePageState extends State<HomePage> {
             animationDuration: Duration(milliseconds: 300),
             index: _currentIndex,
             items: [
-              
-                 Icon(Icons.home),
-
+              Icon(Icons.home),
               Showcase(
-                key: keyChat,
+                key: _three,
                 description: "Chat",
                 child: Icon(Icons.chat_outlined),
               ),
               Showcase(
-                key: keyprofile,
+                key: _four,
                 description: "View Profile",
                 child: Icon(Icons.portrait_outlined),
               ),
-              Showcase(key: keyApplicants, description: "Applicant List", child: 
-              Icon(Icons.people_outlined),),
+              Showcase(
+                key: _five,
+                description: "Applicant List",
+                child: Icon(Icons.people_outlined),
+              ),
             ],
             onTap: (index) {
               setState(() {
@@ -433,7 +422,7 @@ class _HomePageState extends State<HomePage> {
       ),
       floatingActionButton: _currentIndex == 0
           ? Showcase(
-              key: keytwo,
+              key: _two,
               description: "Tap to Add Jobs",
               child: FloatingActionButton(
                 backgroundColor: Color.fromARGB(255, 76, 175, 142),

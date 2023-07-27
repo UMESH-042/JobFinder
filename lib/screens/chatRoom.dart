@@ -315,13 +315,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
             color: Colors.black,
           ),
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) =>
-                    ChatScreen(currentUserEmail: widget.currentUserEmail),
-              ),
-            );
+            Navigator.pop(context);
           },
         ),
         title: StreamBuilder<DocumentSnapshot>(
@@ -381,13 +375,19 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
             }
           },
         ),
-    
+
         actions: [
           IconButton(
-            onPressed: () async{
-                String? recipientToken = await getNotificationTokenForUser(widget.otherUserEmail);
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => CallIDPage(recipientToken: recipientToken, userName:_auth.currentUser?.displayName ?? '',)));
+            onPressed: () async {
+              String? recipientToken =
+                  await getNotificationTokenForUser(widget.otherUserEmail);
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => CallIDPage(
+                            recipientToken: recipientToken,
+                            userName: _auth.currentUser?.displayName ?? '',
+                          )));
             },
             icon: Icon(Icons.phone),
             color: Colors.black,

@@ -41,11 +41,20 @@ class MyApp extends StatelessWidget {
   
   const MyApp({super.key});
 
-  @override
+ @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: SplashScreen(),
+      home: AnimatedSwitcher(
+        duration: Duration(milliseconds: 800),
+        child: SplashScreen(),
+        transitionBuilder: (Widget child, Animation<double> animation) {
+          return FadeTransition(
+            opacity: animation,
+            child: child,
+          );
+        },
+      ),
     );
   }
 }
