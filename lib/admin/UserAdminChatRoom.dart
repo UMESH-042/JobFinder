@@ -90,7 +90,7 @@ class _UserAdminChatRoomState extends State<UserAdminChatRoom> {
     super.dispose();
   }
 
- void onSendMessage(String message,
+  void onSendMessage(String message,
       [String? imageUrl, String? fileUrl]) async {
     if (message.isNotEmpty || imageUrl != null || fileUrl != null) {
       try {
@@ -101,7 +101,7 @@ class _UserAdminChatRoomState extends State<UserAdminChatRoom> {
           String? token =
               await getNotificationTokenForUser(widget.otherUserEmail);
           if (token != null) {
-            sendNotification(currentUsername!,message, token);
+            sendNotification(currentUsername!, message, token);
             print('Notification successful!');
           } else {
             print('Notification Failed!');
@@ -178,43 +178,43 @@ class _UserAdminChatRoomState extends State<UserAdminChatRoom> {
   //   } catch (e) {}
   // }
 
-sendNotification(String userName, String message, String token) async {
-  final data = {
-    'click_action': 'FLUTTER_NOTIFICATION_CLICK',
-    'id': '1',
-    'status': 'done',
-    'userName': userName,
-    'message': message,
-  };
+  sendNotification(String userName, String message, String token) async {
+    final data = {
+      'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+      'id': '1',
+      'status': 'done',
+      'userName': userName,
+      'message': message,
+    };
 
-  try {
-    http.Response response = await http.post(
-      Uri.parse('https://fcm.googleapis.com/fcm/send'),
-      headers: <String, String>{
-        'Content-Type': 'application/json',
-        'Authorization':
-            'key=AAAA6msbZ3E:APA91bHFliFq8amgNOiLnltmuo2AxFHnxfLoFk6uVeSf1LEH7jti-i7l-jtiuFZN61koUeAC94Wa_ckPSE5Ao8xFfK_fiDxtV4sArdob_scjxoVcqXnBTulJ_SH6tE48u0RJGiZyEV_p'
-      },
-      body: jsonEncode(<String, dynamic>{
-        'notification': <String, dynamic>{
-          'title': '$userName: $message',
-          'body': '',
+    try {
+      http.Response response = await http.post(
+        Uri.parse('https://fcm.googleapis.com/fcm/send'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization':
+              'key=AAAA6msbZ3E:APA91bHFliFq8amgNOiLnltmuo2AxFHnxfLoFk6uVeSf1LEH7jti-i7l-jtiuFZN61koUeAC94Wa_ckPSE5Ao8xFfK_fiDxtV4sArdob_scjxoVcqXnBTulJ_SH6tE48u0RJGiZyEV_p'
         },
-        'priority': 'high',
-        'data': data,
-        'to': '$token',
-      }),
-    );
+        body: jsonEncode(<String, dynamic>{
+          'notification': <String, dynamic>{
+            'title': '$userName: $message',
+            'body': '',
+          },
+          'priority': 'high',
+          'data': data,
+          'to': '$token',
+        }),
+      );
 
-    if (response.statusCode == 200) {
-      print("Notification sent successfully");
-    } else {
-      print("Error sending notification");
+      if (response.statusCode == 200) {
+        print("Notification sent successfully");
+      } else {
+        print("Error sending notification");
+      }
+    } catch (e) {
+      print("Error: $e");
     }
-  } catch (e) {
-    print("Error: $e");
   }
-}
 
   void replyToMessage(String message) {
     setState(() {
@@ -279,13 +279,7 @@ sendNotification(String userName, String message, String token) async {
             color: Colors.black,
           ),
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) =>
-                    UsersList(currentUserEmail: widget.currentUserEmail),
-              ),
-            );
+            Navigator.pop(context);
           },
         ),
         title: StreamBuilder<DocumentSnapshot>(

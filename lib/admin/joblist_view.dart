@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:vuna__gigs/admin/AdminJobDetailsPage.dart';
@@ -86,10 +87,10 @@ class _AllJobsPageState extends State<AllJobsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('All Jobs'),
-        backgroundColor: Color.fromARGB(255, 76, 175, 142),
-      ),
+      // appBar: AppBar(
+      //   title: Text('All Jobs'),
+      //   backgroundColor: Color.fromARGB(255, 76, 175, 142),
+      // ),
       body: Column(
         children: [
           Padding(
@@ -232,17 +233,36 @@ class _AllJobsPageState extends State<AllJobsPage> {
                         ),
                         child: ListTile(
                           contentPadding: EdgeInsets.all(16),
+                          // leading: image != null
+                          //     ? ClipRRect(
+                          //         borderRadius: BorderRadius.circular(8),
+                          //         child: Image.network(
+                          //           image,
+                          //           fit: BoxFit.cover,
+                          //           width: 60,
+                          //           height: 60,
+                          //         ),
+                          //       )
+                          //     : Icon(Icons.image, size: 60),
                           leading: image != null
                               ? ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
-                                  child: Image.network(
-                                    image,
+                                  child: CachedNetworkImage(
+                                    imageUrl: image,
                                     fit: BoxFit.cover,
                                     width: 60,
                                     height: 60,
+                                    placeholder: (context, url) => Container(
+                                      color: Colors.white,
+                                      width: 60,
+                                      height: 60,
+                                    ),
+                                    errorWidget: (context, url, error) =>
+                                        Icon(Icons.image, size: 60),
                                   ),
                                 )
                               : Icon(Icons.image, size: 60),
+
                           title: Text(
                             category_exact,
                             style: TextStyle(

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,8 +12,7 @@ import '../view/Profile_Screen.dart';
 
 class UsersList extends StatefulWidget {
   final String currentUserEmail;
-  const UsersList({Key? key, required this.currentUserEmail})
-      : super(key: key);
+  const UsersList({Key? key, required this.currentUserEmail}) : super(key: key);
 
   @override
   _UsersListState createState() => _UsersListState();
@@ -28,8 +28,18 @@ class _UsersListState extends State<UsersList> with WidgetsBindingObserver {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-
-  
+  void deleteUser(DocumentSnapshot user) async {
+    try {
+      await _firestore.collection('users').doc(user.id).delete();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('User deleted')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to delete the user')),
+      );
+    }
+  }
 
   @override
   void initState() {
@@ -37,7 +47,6 @@ class _UsersListState extends State<UsersList> with WidgetsBindingObserver {
     _usersStream = FirebaseFirestore.instance.collection('users').snapshots();
     WidgetsBinding.instance.addObserver(this);
     setStatus("Online");
-
 
     Future.delayed(Duration(seconds: 1), () {
       setState(() {
@@ -126,34 +135,63 @@ class _UsersListState extends State<UsersList> with WidgetsBindingObserver {
     );
   }
 
-
   void blockUser(DocumentSnapshot user) async {
-  await _firestore
-      .collection('users')
-      .doc(user.id)
-      .update({"status": "Blocked"});
-   ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text('User blocked')),
-  );
-}
+    await _firestore
+        .collection('users')
+        .doc(user.id)
+        .update({"status": "Blocked"});
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('User blocked')),
+    );
+  }
 
-void unblockUser(DocumentSnapshot user) async {
-  await _firestore
-      .collection('users')
-      .doc(user.id)
-      .update({"status": "Online"});
-        ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text('User unblocked')),
-  );
+  void unblockUser(DocumentSnapshot user) async {
+    await _firestore
+        .collection('users')
+        .doc(user.id)
+        .update({"status": "Online"});
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('User unblocked')),
+    );
+  }
 
-}
-
+  Future<void> _showDeleteConfirmationDialog(DocumentSnapshot user) async {
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Confirm Deletion'),
+          content: Text('Do you want to delete this user?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                deleteUser(user);
+              },
+              child: Text(
+                'Delete',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-       final size = MediaQuery.of(context).size;
+    final size = MediaQuery.of(context).size;
     return Scaffold(
-        key: _scaffoldKey,
+      key: _scaffoldKey,
       backgroundColor: Color.fromARGB(255, 249, 250, 251),
       appBar: AppBar(
         toolbarHeight: 80,
@@ -171,7 +209,8 @@ void unblockUser(DocumentSnapshot user) async {
                 MaterialPageRoute(
                     builder: (_) => AdminHomeScreen(
                           currentuserEmail: widget.currentUserEmail,
-                        )));          },
+                        )));
+          },
         ),
         title: Container(
           decoration: BoxDecoration(
@@ -195,107 +234,137 @@ void unblockUser(DocumentSnapshot user) async {
           ),
         ),
       ),
-      body:isLoading? ShimmerEffect(): Column(
-        children: [
-          SizedBox(height: 20),
-          Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: _usersStream,
-              builder: (BuildContext context,
-                  AsyncSnapshot<QuerySnapshot> snapshot) {
-                if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                }
+      body: isLoading
+          ? ShimmerEffect()
+          : Column(
+              children: [
+                SizedBox(height: 20),
+                Expanded(
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: _usersStream,
+                    builder: (BuildContext context,
+                        AsyncSnapshot<QuerySnapshot> snapshot) {
+                      if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      }
 
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
 
-                _usersList = snapshot.data!.docs;
+                      _usersList = snapshot.data!.docs;
 
-                _usersList.removeWhere(
-                    (user) => user['email'] == widget.currentUserEmail);
+                      _usersList.removeWhere(
+                          (user) => user['email'] == widget.currentUserEmail);
 
-                if (_searchController.text.isNotEmpty) {
-                  _usersList = _usersList
-                      .where((user) => user['name']
-                          .toLowerCase()
-                          .contains(_searchController.text.toLowerCase()))
-                      .toList();
-                }
-                return ListView.builder(
-  itemCount: _usersList.length,
-  itemBuilder: (BuildContext context, int index) {
-    final user = _usersList[index];
-    final userName = user['name'];
-    final userEmail = user['email'];
-    final imageUrl = user['imageUrl'];
-    final userType = user['userType'];
-    final userStatus = user['status'];
-    final userId=user['uid'];
+                      if (_searchController.text.isNotEmpty) {
+                        _usersList = _usersList
+                            .where((user) => user['name']
+                                .toLowerCase()
+                                .contains(_searchController.text.toLowerCase()))
+                            .toList();
+                      }
+                      return ListView.builder(
+                        itemCount: _usersList.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          final user = _usersList[index];
+                          final userName = user['name'];
+                          final userEmail = user['email'];
+                          final imageUrl = user['imageUrl'];
+                          final userType = user['userType'];
+                          final userStatus = user['status'];
+                          final userId = user['uid'];
 
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        vertical: 8.0,
-        horizontal: 16.0,
-      ),
-      child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        child: ListTile(
-          onTap: (){
-               Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              ProfileScreen(useremail: userId)));
-          },
-          leading: CircleAvatar(
-            backgroundImage: NetworkImage(imageUrl),
-          ),
-          title: userType == 'admin'
-              ? Text(userName + '(Admin)')
-              : Text(userName),
-          subtitle: Text(userEmail),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                onPressed: () => openChatRoom(user),
-                icon: Icon(Icons.chat),
-              ),
-              IconButton(
-                onPressed: () {
-                  if (userStatus == "Blocked") {
-                    unblockUser(user);
-                  } else {
-                    blockUser(user);
-                  }
-                },
-                icon: Icon(userStatus == "Blocked"
-                    ? Icons.check_circle
-                    : Icons.block),
-              ),
-              IconButton(
-                onPressed: () {},
-                icon: Icon(Icons.payment),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  },
-);
-
-              },
+                          return Padding(
+                            padding: EdgeInsets.symmetric(
+                              vertical: 8.0,
+                              horizontal: 16.0,
+                            ),
+                            child: Card(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              child: ListTile(
+                                onTap: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => ProfileScreen(
+                                              useremail: userId)));
+                                },
+                                // leading: CircleAvatar(
+                                //   backgroundImage: NetworkImage(imageUrl),
+                                // ),
+                                 leading: imageUrl != null
+                ? CachedNetworkImage(
+                    imageUrl: imageUrl,
+                    placeholder: (context, url) => Container(
+                      width: 60,
+                      height: 60,
+                      color: Colors.white,
+                    ),
+                    errorWidget: (context, url, error) => Icon(Icons.error),
+                    imageBuilder: (context, imageProvider) => CircleAvatar(
+                      backgroundImage: imageProvider,
+                      radius: 30.0,
+                    ),
+                  )
+                : CircleAvatar(
+                    backgroundColor: Colors.grey[400],
+                    child: Icon(Icons.person, color: Colors.white),
+                  ),
+                                title: userType == 'admin'
+                                    ? Text(userName + '(Admin)')
+                                    : Text(userName),
+                                subtitle: Text(userEmail),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      onPressed: () => openChatRoom(user),
+                                      icon: Icon(Icons.chat),
+                                    ),
+                                    IconButton(
+                                      onPressed: () {
+                                        if (userStatus == "Blocked") {
+                                          unblockUser(user);
+                                        } else {
+                                          blockUser(user);
+                                        }
+                                      },
+                                      icon: Icon(userStatus == "Blocked"
+                                          ? Icons.check_circle
+                                          : Icons.block),
+                                    ),
+                                    IconButton(
+                                      onPressed: () {
+                                        _showDeleteConfirmationDialog(user);
+                                      },
+                                      icon: Icon(Icons.delete),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
+    );
+  }
+}
+
+class PlaceholderImage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.grey[200],
     );
   }
 }
