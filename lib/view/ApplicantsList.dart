@@ -12,6 +12,56 @@ class ApplicantsListScreen extends StatelessWidget {
 
   ApplicantsListScreen({required this.postedByEmail});
 
+confirmDeleteDialog(BuildContext context) async {
+  return showDialog<bool>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text(
+          'Confirm Delete',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          'Do you really want to delete this applicant?',
+          style: TextStyle(fontSize: 16),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(
+              'Delete',
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+  void deleteApplicant(String applicantId) {
+    try {
+      FirebaseFirestore.instance
+          .collection('applicants')
+          .doc(applicantId)
+          .delete()
+          .then((_) {
+        print("Applicant with ID $applicantId deleted successfully.");
+      }).catchError((error) {
+        print("Error deleting applicant: $error");
+      });
+    } catch (e) {
+      print("An error occurred while deleting the applicant: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,16 +93,12 @@ class ApplicantsListScreen extends StatelessWidget {
           if (filteredApplicants.isEmpty) {
             return Center(child: Text('No applicants found'));
           }
-        //    filteredApplicants.sort((a, b) {
-        //   final timestampA = a['timestamp'] as Timestamp;
-        //   final timestampB = b['timestamp'] as Timestamp;
-        //   return timestampA.compareTo(timestampB);
-        // });
-        filteredApplicants.sort((a, b) {
-          final timestampA = a['timestamp'] as Timestamp;
-          final timestampB = b['timestamp'] as Timestamp;
-          return timestampB.compareTo(timestampA); // Reverse the order for most recent first
-        });
+          filteredApplicants.sort((a, b) {
+            final timestampA = a['timestamp'] as Timestamp;
+            final timestampB = b['timestamp'] as Timestamp;
+            return timestampB.compareTo(
+                timestampA); // Reverse the order for most recent first
+          });
           return ListView.builder(
             itemCount: filteredApplicants.length,
             itemBuilder: (context, index) {
@@ -73,96 +119,122 @@ class ApplicantsListScreen extends StatelessWidget {
               print(email);
               print(message);
               print(cv_url);
-              return Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Card(
-                  color: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+
+              
+              return Dismissible(
+                  key: Key(applicant.id),
+                  background: Container(
+                    color: Colors.red,
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Padding(
+                        padding: EdgeInsets.only(left: 16.0),
+                        child: Icon(
+                          Icons.delete,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
                   ),
-                  elevation: 4,
-                  child: ListTile(
-                    onTap: () async {
-                      final jobSnapshot = await FirebaseFirestore.instance
-                          .collection('jobs')
-                          .doc(job_document_id)
-                          .get();
-                      final jobData =
-                          jobSnapshot.data() as Map<String, dynamic>;
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ApplicantDetailsScreen(
-                            firstName: first_name,
-                            lastName: last_name,
-                            email: email,
-                            message: message,
-                            jobDetails:
-                                jobData, // Pass job details to the ApplicantDetailsScreen
-                            // Pass any other relevant data fields here
-                          ),
-                        ),
-                      );
-                    },
-                    leading: CircleAvatar(
-                      backgroundColor: Colors.grey,
-                      child: Text(
-                        '${first_name[0]}${last_name[0]}',
-                        style: TextStyle(color: Colors.white),
+                  direction: DismissDirection.startToEnd,
+                  confirmDismiss: (direction) async {
+                    return await confirmDeleteDialog(context);
+                  },
+                  onDismissed: (direction) {
+                    if (direction == DismissDirection.startToEnd) {
+                      deleteApplicant(applicant.id);
+                    }
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: Card(
+                      color: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                    ),
-                    title: Text(
-                      '$first_name $last_name',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          email,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey[700],
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            Icon(Icons.access_time),
-                            SizedBox(width: 4),
-                            Text(
-                              'Applied $timeAgo',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[600],
+                      elevation: 4,
+                      child: ListTile(
+                        onTap: () async {
+                          final jobSnapshot = await FirebaseFirestore.instance
+                              .collection('jobs')
+                              .doc(job_document_id)
+                              .get();
+                          final jobData =
+                              jobSnapshot.data() as Map<String, dynamic>;
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ApplicantDetailsScreen(
+                                firstName: first_name,
+                                lastName: last_name,
+                                email: email,
+                                message: message,
+                                jobDetails:
+                                    jobData, // Pass job details to the ApplicantDetailsScreen
+                                // Pass any other relevant data fields here
                               ),
+                            ),
+                          );
+                        },
+                        leading: CircleAvatar(
+                          backgroundColor: Colors.grey,
+                          child: Text(
+                            '${first_name[0]}${last_name[0]}',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                        title: Text(
+                          '$first_name $last_name',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              email,
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                Icon(Icons.access_time),
+                                SizedBox(width: 4),
+                                Text(
+                                  'Applied $timeAgo',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          onPressed: () async {
-                            String cvUrl = applicantData['cv_url'];
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        PdfViewer(PdfUrl: cvUrl)));
-                          },
-                          icon: Icon(Icons.picture_as_pdf),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              onPressed: () async {
+                                String cvUrl = applicantData['cv_url'];
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            PdfViewer(PdfUrl: cvUrl)));
+                              },
+                              icon: Icon(Icons.picture_as_pdf),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
-              );
+                  ));
             },
           );
         },
@@ -188,7 +260,6 @@ class PDFViewerScreen extends StatelessWidget {
     );
   }
 }
-
 
 class ApplicantDetailsScreen extends StatelessWidget {
   final String firstName;
@@ -217,7 +288,8 @@ class ApplicantDetailsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Applicant Details'),
-        backgroundColor: Color.fromARGB(255, 76, 175, 142), // Customize the app bar color
+        backgroundColor:
+            Color.fromARGB(255, 76, 175, 142), // Customize the app bar color
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

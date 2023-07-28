@@ -64,7 +64,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) => showShowcaseIfNeeded());
+    WidgetsBinding.instance.addPostFrameCallback((_) => startShowCase());
 
     super.initState();
     FirebaseMessaging.instance.getInitialMessage();

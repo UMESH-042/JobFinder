@@ -237,10 +237,10 @@ class _MyApplicationPageState extends State<MyApplicationPage> {
 
                 return Dismissible(
                   key: Key(application.id),
-                  direction: DismissDirection.endToStart,
+                  direction: DismissDirection.startToEnd,
                   background: Container(
-                    alignment: Alignment.centerRight,
-                    padding: EdgeInsets.only(right: 16),
+                    alignment: Alignment.centerLeft,
+                    padding: EdgeInsets.only(left: 16),
                     color: Colors.red,
                     child: Icon(
                       Icons.delete,
@@ -272,36 +272,43 @@ class _MyApplicationPageState extends State<MyApplicationPage> {
                   //     },
                   //   );
                   // },
-                   confirmDismiss: (direction) async {
-        bool confirmDelete = await showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text("Delete Application"),
-              content: Text("Are you sure you want to delete this application?"),
-              actions: <Widget>[
-                TextButton(
-                  child: Text("Cancel", style: TextStyle(color: Colors.black)),
-                  onPressed: () {
-                    Navigator.of(context).pop(false); // Close the dialog without deleting
-                  },
-                ),
-                TextButton(
-                  child: Text("Delete", style: TextStyle(color: Colors.white)),
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all<Color>(Colors.red),
-                  ),
-                  onPressed: () {
-                    Navigator.of(context).pop(true); // Close the dialog and confirm deletion
-                  },
-                ),
-              ],
-            );
-          },
-        );
+                  confirmDismiss: (direction) async {
+                    bool confirmDelete = await showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text("Delete Application"),
+                          content: Text(
+                              "Are you sure you want to delete this application?"),
+                          actions: <Widget>[
+                            TextButton(
+                              child: Text("Cancel",
+                                  style: TextStyle(color: Colors.black)),
+                              onPressed: () {
+                                Navigator.of(context).pop(
+                                    false); // Close the dialog without deleting
+                              },
+                            ),
+                            TextButton(
+                              child: Text("Delete",
+                                  style: TextStyle(color: Colors.white)),
+                              style: ButtonStyle(
+                                backgroundColor:
+                                    MaterialStateProperty.all<Color>(
+                                        Colors.red),
+                              ),
+                              onPressed: () {
+                                Navigator.of(context).pop(
+                                    true); // Close the dialog and confirm deletion
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    );
 
-        return confirmDelete;
-      },
+                    return confirmDelete;
+                  },
                   onDismissed: (direction) {
                     // Delete the application from Firestore
                     FirebaseFirestore.instance
@@ -319,7 +326,17 @@ class _MyApplicationPageState extends State<MyApplicationPage> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: ListTile(
-                      leading: imageUrl!=null?Image.network(imageUrl,width: 40,height: 40,fit: BoxFit.cover,):Icon(Icons.image_not_supported,size: 56,),
+                      leading: imageUrl != null
+                          ? Image.network(
+                              imageUrl,
+                              width: 40,
+                              height: 40,
+                              fit: BoxFit.cover,
+                            )
+                          : Icon(
+                              Icons.image_not_supported,
+                              size: 56,
+                            ),
                       title: Text(
                         '${category} (${companyName})',
                         style: TextStyle(

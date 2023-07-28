@@ -219,17 +219,26 @@ class _CreateAccountState extends State<CreateAccount> {
               print("Account Created Successfully");
               showSnackBar("Account Created Successfully");
               _clearFields();
-                   Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => HomePage(
-              currentUserEmail: user.email!,
-              requiresProfileSetup: true,
-            ),
-          ),
-      
-      
-    );
+    //                Navigator.pushReplacement(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (_) => HomePage(
+    //           currentUserEmail: user.email!,
+    //           requiresProfileSetup: true,
+    //         ),
+    //       ),    
+    // );
+    Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (_) =>ShowCaseWidget(builder: Builder(builder: (context)=> HomePage(
+                  currentUserEmail: user.email!,
+                  requiresProfileSetup: true,
+                ),
+              ),
+                )
+              )
+            );
             } else {
               print("Account Creation Failed");
               setState(() {
