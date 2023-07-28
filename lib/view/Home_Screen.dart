@@ -16,6 +16,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:vuna__gigs/notification/notification_service.dart';
+import 'package:vuna__gigs/view/Feedback.dart';
 import 'package:vuna__gigs/view/MyApplications.dart';
 import 'package:vuna__gigs/view/add_jobs.dart';
 import 'package:vuna__gigs/view/Edit_profile_page.dart';
@@ -113,7 +114,6 @@ class _HomePageState extends State<HomePage> {
     ]);
   }
 
-
   Future<bool> _hasShownShowcase(String email) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getBool('showcase_$email') ?? false;
@@ -131,7 +131,6 @@ class _HomePageState extends State<HomePage> {
       _markShowcaseAsShown(widget.currentUserEmail);
     }
   }
-
 
   @override
   void dispose() {
@@ -329,13 +328,16 @@ class _HomePageState extends State<HomePage> {
                       leading: CircleAvatar(
                         backgroundColor: Colors.pink[300],
                         child: Icon(
-                          Icons.share_location_outlined,
+                          Icons.feedback_outlined,
                           color: Colors.white,
                         ),
                       ),
-                      title: Text('Share App'),
+                      title: Text('Feedback'),
                       onTap: () {
-                        Navigator.pop(context);
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => FeedbackPage()));
                       },
                     ),
                     SizedBox(height: 10),
@@ -411,20 +413,23 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       floatingActionButton: _currentIndex == 0
-          ?Showcase(key: _fabKey, description: 'Click here to add new jobs.', child:  FloatingActionButton(
-              backgroundColor: Color.fromARGB(255, 76, 175, 142),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => AddJobs(
-                      otherUserEmail: widget.currentUserEmail,
+          ? Showcase(
+              key: _fabKey,
+              description: 'Click here to add new jobs.',
+              child: FloatingActionButton(
+                backgroundColor: Color.fromARGB(255, 76, 175, 142),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AddJobs(
+                        otherUserEmail: widget.currentUserEmail,
+                      ),
                     ),
-                  ),
-                );
-              },
-              child: Icon(Icons.add),
-            ))
+                  );
+                },
+                child: Icon(Icons.add),
+              ))
           : null,
     );
   }

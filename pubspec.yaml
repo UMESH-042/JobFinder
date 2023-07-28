@@ -65,6 +65,7 @@ dependencies:
   zego_uikit_prebuilt_call: ^3.1.1
   showcaseview: ^2.0.3
   shared_preferences: ^2.2.0
+  multi_select_flutter: ^4.1.3
 
 
 
