@@ -47,12 +47,8 @@ class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
   bool isLoading = true;
   String? _imageUrl;
-  final GlobalKey _one = GlobalKey();
-  final GlobalKey _two = GlobalKey();
-  final GlobalKey _three = GlobalKey();
-  final GlobalKey _four = GlobalKey();
-  final GlobalKey _five = GlobalKey();
-  final GlobalKey _six = GlobalKey();
+  final GlobalKey _fabKey = GlobalKey();
+  final GlobalKey _hamburgerIconKey = GlobalKey();
 
   List<Widget> _screens = [];
 
@@ -68,12 +64,11 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) => showShowcaseIfNeeded());
+
     super.initState();
     FirebaseMessaging.instance.getInitialMessage();
 
-    // FirebaseMessaging.onMessage.listen((event) {
-    //   LocalNotificationService.display(event);
-    // });
     _firebaseMessagingStream = FirebaseMessaging.onMessage.listen((event) {
       LocalNotificationService.display(event);
     });
@@ -108,28 +103,35 @@ class _HomePageState extends State<HomePage> {
       });
     });
 
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   ShowCaseWidget.of(context).startShowCase([keyone, keytwo,keyChat,keyprofile,keyApplicants]);
-    // });
-    _checkShowcaseStatus();
-
     _requestNotificationPermissions();
   }
 
-  Future<void> _checkShowcaseStatus() async {
+  void startShowCase() {
+    ShowCaseWidget.of(context).startShowCase([
+      _fabKey,
+      _hamburgerIconKey,
+    ]);
+  }
+
+
+  Future<bool> _hasShownShowcase(String email) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool showcaseShown = prefs.getBool('showcase_shown') ?? false;
+    return prefs.getBool('showcase_$email') ?? false;
+  }
 
-    if (!showcaseShown) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ShowCaseWidget.of(context)
-            .startShowCase([_one, _two, _three, _four, _five]);
+  Future<void> _markShowcaseAsShown(String email) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('showcase_$email', true);
+  }
 
-        // Mark showcase as shown
-        prefs.setBool('showcase_shown', true);
-      });
+  void showShowcaseIfNeeded() async {
+    bool hasShownShowcase = await _hasShownShowcase(widget.currentUserEmail);
+    if (!hasShownShowcase) {
+      startShowCase();
+      _markShowcaseAsShown(widget.currentUserEmail);
     }
   }
+
 
   @override
   void dispose() {
@@ -196,8 +198,8 @@ class _HomePageState extends State<HomePage> {
               backgroundColor: Colors.transparent,
               elevation: 0,
               leading: Showcase(
-                key: _one,
-                description: "Tap to open Various Options",
+                key: _hamburgerIconKey,
+                description: 'Click here to open the drawer.',
                 child: Builder(
                   builder: (BuildContext context) {
                     return Container(
@@ -396,21 +398,9 @@ class _HomePageState extends State<HomePage> {
             index: _currentIndex,
             items: [
               Icon(Icons.home),
-              Showcase(
-                key: _three,
-                description: "Chat",
-                child: Icon(Icons.chat_outlined),
-              ),
-              Showcase(
-                key: _four,
-                description: "View Profile",
-                child: Icon(Icons.portrait_outlined),
-              ),
-              Showcase(
-                key: _five,
-                description: "Applicant List",
-                child: Icon(Icons.people_outlined),
-              ),
+              Icon(Icons.chat_outlined),
+              Icon(Icons.portrait_outlined),
+              Icon(Icons.people_outlined),
             ],
             onTap: (index) {
               setState(() {
@@ -421,23 +411,20 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       floatingActionButton: _currentIndex == 0
-          ? Showcase(
-              key: _two,
-              description: "Tap to Add Jobs",
-              child: FloatingActionButton(
-                backgroundColor: Color.fromARGB(255, 76, 175, 142),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => AddJobs(
-                        otherUserEmail: widget.currentUserEmail,
-                      ),
+          ?Showcase(key: _fabKey, description: 'Click here to add new jobs.', child:  FloatingActionButton(
+              backgroundColor: Color.fromARGB(255, 76, 175, 142),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AddJobs(
+                      otherUserEmail: widget.currentUserEmail,
                     ),
-                  );
-                },
-                child: Icon(Icons.add),
-              ))
+                  ),
+                );
+              },
+              child: Icon(Icons.add),
+            ))
           : null,
     );
   }

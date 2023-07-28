@@ -130,20 +130,15 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
         automaticallyImplyLeading: false,
         backgroundColor: Color.fromARGB(255, 235, 237, 240),
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios,
-            color: Colors.black,
-          ),
-          onPressed: () {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (_) => HomePage(
-                          currentUserEmail: widget.currentUserEmail, requiresProfileSetup: false,
-                        )));
-          },
-        ),
+        // leading: IconButton(
+        //   icon: Icon(
+        //     Icons.arrow_back_ios,
+        //     color: Colors.black,
+        //   ),
+        //   onPressed: () {
+            
+        //   },
+        // ),
         title: Container(
           decoration: BoxDecoration(
             color: Colors.white,
