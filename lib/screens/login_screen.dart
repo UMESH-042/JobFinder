@@ -329,77 +329,155 @@ class _LoginScreenState extends State<LoginScreen> {
     _password.clear();
   }
 
+  // void _handleGoogleSignIn() async {
+  //   if (_isLoggingIn) return;
+  //   if (!mounted) return;
+  //   setState(() {
+  //     isloading = true;
+  //   });
+  //   _isLoggingIn = true;
+
+  //   final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+  //   if (googleUser != null) {
+  //     try {
+  //       final GoogleSignInAuthentication googleAuth =
+  //           await googleUser.authentication;
+
+  //       // Sign in with Firebase using the Google ID Token
+  //       final AuthCredential credential = GoogleAuthProvider.credential(
+  //         accessToken: googleAuth.accessToken,
+  //         idToken: googleAuth.idToken,
+  //       );
+
+  //       final UserCredential userCredential =
+  //           await FirebaseAuth.instance.signInWithCredential(credential);
+  //       final User? user = userCredential.user;
+  //       if (user != null) {
+  //         // Google Sign-In successful
+  //         print("Google Sign-In Successful");
+
+  //         // Check the user's status (Blocked or not)
+  //         final status = await checkUserStatus(user.email!);
+
+  //         if (status == 'Blocked') {
+  //           // User is blocked, show an error SnackBar and prevent login
+  //           final snackBar = SnackBar(content: Text('You are blocked'));
+  //           ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+  //           // Sign out the user from Google as they are blocked
+  //           await GoogleSignIn().signOut();
+  //           setState(() {
+  //             isloading = false;
+  //           });
+  //         } else {
+  //           // User is not blocked, proceed with login
+  //           // Store the user information in Firestore
+  //           await storeUserDataInFirestore(user);
+  //         }
+  //       } else {
+  //         print("Google Sign-In Failed");
+  //         // Show a failure SnackBar
+  //         final snackBar = SnackBar(content: Text('Google Sign-In Failed'));
+  //         ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  //       }
+  //     } catch (e) {
+  //       setState(() {
+  //         isloading = false;
+  //       });
+  //       print("Google Sign-In Error: $e");
+  //       // Show an error SnackBar
+  //       final snackBar = SnackBar(content: Text('Google Sign-In Error'));
+  //       ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  //     }
+  //   } else {
+  //     setState(() {
+  //       isloading = false;
+  //     });
+  //     print("Google Sign-In Aborted");
+  //     // Show a cancellation SnackBar
+  //     final snackBar = SnackBar(content: Text('Google Sign-In Aborted'));
+  //     ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  //   }
+  //   _isLoggingIn = false;
+  // }
   void _handleGoogleSignIn() async {
-    if (_isLoggingIn) return;
-    if (!mounted) return;
-    setState(() {
-      isloading = true;
-    });
+  if (_isLoggingIn) return;
+  setState(() {
+    isloading = true;
     _isLoggingIn = true;
+  });
+  
+  
 
-    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-    if (googleUser != null) {
-      try {
-        final GoogleSignInAuthentication googleAuth =
-            await googleUser.authentication;
+  final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+  if (googleUser != null) {
+    try {
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
 
-        // Sign in with Firebase using the Google ID Token
-        final AuthCredential credential = GoogleAuthProvider.credential(
-          accessToken: googleAuth.accessToken,
-          idToken: googleAuth.idToken,
-        );
+      // Sign in with Firebase using the Google ID Token
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
 
-        final UserCredential userCredential =
-            await FirebaseAuth.instance.signInWithCredential(credential);
-        final User? user = userCredential.user;
-        if (user != null) {
-          // Google Sign-In successful
-          print("Google Sign-In Successful");
+      final UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+      final User? user = userCredential.user;
+      if (user != null) {
+        print("Google Sign-In Successful");
 
-          // Check the user's status (Blocked or not)
-          final status = await checkUserStatus(user.email!);
+        // Check the user's status (Blocked or not) using local data instead of Firestore query
+        final status = await checkUserStatus(user.email!);
 
-          if (status == 'Blocked') {
-            // User is blocked, show an error SnackBar and prevent login
-            final snackBar = SnackBar(content: Text('You are blocked'));
-            ScaffoldMessenger.of(context).showSnackBar(snackBar);
-
-            // Sign out the user from Google as they are blocked
-            await GoogleSignIn().signOut();
-            setState(() {
-              isloading = false;
-            });
-          } else {
-            // User is not blocked, proceed with login
-            // Store the user information in Firestore
-            await storeUserDataInFirestore(user);
-          }
-        } else {
-          print("Google Sign-In Failed");
-          // Show a failure SnackBar
-          final snackBar = SnackBar(content: Text('Google Sign-In Failed'));
+        if (status == 'Blocked') {
+          // User is blocked, show an error SnackBar and prevent login
+          final snackBar = SnackBar(content: Text('You are blocked'));
           ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+          // Sign out the user from Google as they are blocked
+          await GoogleSignIn().signOut();
+          setState(() {
+            isloading = false;
+            _isLoggingIn = false;
+          });
+        } else {
+          // User is not blocked, proceed with login
+          // Store the user information in Firestore
+          await storeUserDataInFirestore(user);
         }
-      } catch (e) {
+      } else {
+        print("Google Sign-In Failed");
+        // Show a failure SnackBar
+        final snackBar = SnackBar(content: Text('Google Sign-In Failed'));
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
         setState(() {
           isloading = false;
+          _isLoggingIn = false;
         });
-        print("Google Sign-In Error: $e");
-        // Show an error SnackBar
-        final snackBar = SnackBar(content: Text('Google Sign-In Error'));
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
       }
-    } else {
+    } catch (e) {
+      print("Google Sign-In Error: $e");
+      // Show an error SnackBar
+      final snackBar = SnackBar(content: Text('Google Sign-In Error'));
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
       setState(() {
         isloading = false;
+        _isLoggingIn = false;
       });
-      print("Google Sign-In Aborted");
-      // Show a cancellation SnackBar
-      final snackBar = SnackBar(content: Text('Google Sign-In Aborted'));
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
-    _isLoggingIn = false;
+  } else {
+    print("Google Sign-In Aborted");
+    // Show a cancellation SnackBar
+    final snackBar = SnackBar(content: Text('Google Sign-In Aborted'));
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    setState(() {
+      isloading = false;
+      _isLoggingIn = false;
+    });
   }
+}
+
 
   Future<void> storeUserDataInFirestore(User user) async {
     final userData = {
@@ -592,6 +670,10 @@ class _LoginScreenState extends State<LoginScreen> {
           }
         } else {
           print("Please fill the form correctly!");
+             final snackBar = SnackBar(
+                  content: Text('Please fill the form correctly!'),
+                );
+                ScaffoldMessenger.of(context).showSnackBar(snackBar);
         }
       },
       child: Container(

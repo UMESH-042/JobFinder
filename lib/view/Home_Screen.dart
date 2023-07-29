@@ -109,8 +109,8 @@ class _HomePageState extends State<HomePage> {
 
   void startShowCase() {
     ShowCaseWidget.of(context).startShowCase([
-      _fabKey,
       _hamburgerIconKey,
+      _fabKey,
     ]);
   }
 

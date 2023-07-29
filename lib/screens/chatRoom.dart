@@ -46,6 +46,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   String? repliedMessage;
 
   final FocusNode _messageFocusNode = FocusNode();
+  
 
   storeNotificationToken() async {
     String? token = await FirebaseMessaging.instance.getToken();
@@ -347,24 +348,31 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                         backgroundImage: NetworkImage(imageUrl),
                       ),
                       SizedBox(width: 8),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          userType == 'admin'
-                              ? Text(
-                                  widget.userMap['name'] + '(Admin)',
-                                  style: TextStyle(
-                                      color: Colors.black, fontSize: 18),
-                                )
-                              : Text(
-                                  widget.userMap['name'],
-                                  style: TextStyle(color: Colors.black),
-                                ),
-                          Text(
-                            status,
-                            style: TextStyle(fontSize: 14, color: Colors.black),
+                      Expanded(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              userType == 'admin'
+                                  ? Text(
+                                      widget.userMap['name'] + '(Admin)',
+                                      style: TextStyle(
+                                          color: Colors.black, fontSize: 18),
+                                    )
+                                  : Text(
+                                      widget.userMap['name'],
+                                      style: TextStyle(color: Colors.black),
+                                    ),
+                              Text(
+                                status,
+                                style: TextStyle(
+                                    fontSize: 14, color: Colors.black),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     ],
                   ),
@@ -394,239 +402,241 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
           )
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Container(
-              height: size.height / 1.25,
-              width: size.width,
-              child: StreamBuilder<QuerySnapshot>(
-                stream: _firestore
-                    .collection('chatroom')
-                    .doc(widget.chatRoomId)
-                    .collection('chats')
-                    .orderBy("time", descending: false)
-                    .snapshots(),
-                builder: (BuildContext context,
-                    AsyncSnapshot<QuerySnapshot> snapshot) {
-                  if (snapshot.data != null) {
-                    final messages = snapshot.data!.docs;
-                    return ListView.builder(
-                      itemCount: messages.length,
-                      itemBuilder: (context, index) {
-                        final message =
-                            messages[index].data() as Map<String, dynamic>;
-                        final isCurrentUser =
-                            message['sendBy'] == _auth.currentUser?.displayName;
-                        final timestamp =
-                            (message['time'] as Timestamp?)?.toDate() ??
-                                DateTime.now();
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              child: Container(
+                height: size.height / 1.25,
+                width: size.width,
+                child: StreamBuilder<QuerySnapshot>(
+                  stream: _firestore
+                      .collection('chatroom')
+                      .doc(widget.chatRoomId)
+                      .collection('chats')
+                      .orderBy("time", descending: false)
+                      .snapshots(),
+                  builder: (BuildContext context,
+                      AsyncSnapshot<QuerySnapshot> snapshot) {
+                    if (snapshot.data != null) {
+                      final messages = snapshot.data!.docs;
+                      return ListView.builder(
+                        itemCount: messages.length,
+                        itemBuilder: (context, index) {
+                          final message =
+                              messages[index].data() as Map<String, dynamic>;
+                          final isCurrentUser = message['sendBy'] ==
+                              _auth.currentUser?.displayName;
+                          final timestamp =
+                              (message['time'] as Timestamp?)?.toDate() ??
+                                  DateTime.now();
 
-                        return Dismissible(
-                          key: UniqueKey(),
-                          direction: isCurrentUser
-                              ? DismissDirection.endToStart
-                              : DismissDirection.startToEnd,
-                          background: Container(
-                            color: Colors.red,
-                            alignment: Alignment.centerLeft,
-                            padding: EdgeInsets.only(left: 16),
-                            child: Icon(
-                              isCurrentUser
-                                  ? Icons.delete_forever
-                                  : Icons.reply,
-                              color: Colors.white,
+                          return Dismissible(
+                            key: UniqueKey(),
+                            direction: isCurrentUser
+                                ? DismissDirection.endToStart
+                                : DismissDirection.startToEnd,
+                            background: Container(
+                              color: Colors.red,
+                              alignment: Alignment.centerLeft,
+                              padding: EdgeInsets.only(left: 16),
+                              child: Icon(
+                                isCurrentUser
+                                    ? Icons.delete_forever
+                                    : Icons.reply,
+                                color: Colors.white,
+                              ),
                             ),
-                          ),
-                          secondaryBackground: Container(
-                            color: isCurrentUser
-                                ? Colors.red
-                                : Colors.blue.withOpacity(0.5),
-                            alignment: isCurrentUser
-                                ? Alignment.centerRight
-                                : Alignment.centerLeft,
-                            padding: EdgeInsets.only(right: 16),
-                            child: Icon(
-                              isCurrentUser
-                                  ? Icons.delete_forever
-                                  : Icons.reply,
-                              color: Colors.white,
+                            secondaryBackground: Container(
+                              color: isCurrentUser
+                                  ? Colors.red
+                                  : Colors.blue.withOpacity(0.5),
+                              alignment: isCurrentUser
+                                  ? Alignment.centerRight
+                                  : Alignment.centerLeft,
+                              padding: EdgeInsets.only(right: 16),
+                              child: Icon(
+                                isCurrentUser
+                                    ? Icons.delete_forever
+                                    : Icons.reply,
+                                color: Colors.white,
+                              ),
                             ),
-                          ),
-                          onDismissed: (direction) {
-                            if (direction == DismissDirection.endToStart) {
-                              // Delete message
-                              _firestore
-                                  .collection('chatroom')
-                                  .doc(widget.chatRoomId)
-                                  .collection('chats')
-                                  .doc(messages[index].id)
-                                  .delete();
-                            } else if (direction ==
-                                DismissDirection.startToEnd) {
-                              // Reply to message
-                              replyToMessage(message['message']);
-                            }
-                          },
-                          child: MessageBubble(
-                            message: message['message'],
-                            isCurrentUser: isCurrentUser,
-                            timestamp: timestamp,
-                            onReply: () {
-                              replyToMessage(message['message']);
+                            onDismissed: (direction) {
+                              if (direction == DismissDirection.endToStart) {
+                                // Delete message
+                                _firestore
+                                    .collection('chatroom')
+                                    .doc(widget.chatRoomId)
+                                    .collection('chats')
+                                    .doc(messages[index].id)
+                                    .delete();
+                              } else if (direction ==
+                                  DismissDirection.startToEnd) {
+                                // Reply to message
+                                replyToMessage(message['message']);
+                              }
                             },
-                            repliedMessage: message['repliedMessage'],
-                            currentUserName: _auth.currentUser?.displayName,
-                            otherUserName: isCurrentUser
-                                ? widget.userMap['name']
-                                : null, // Pass the other user's name if it's not the current user
-                            fileUrl: message['fileUrl'],
-                          ),
-                        );
-                      },
-                    );
-                  } else if (snapshot.hasError) {
-                    return Center(
-                      child: Text('Error: ${snapshot.error}'),
-                    );
-                  } else {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-                },
+                            child: MessageBubble(
+                              message: message['message'],
+                              isCurrentUser: isCurrentUser,
+                              timestamp: timestamp,
+                              onReply: () {
+                                replyToMessage(message['message']);
+                              },
+                              repliedMessage: message['repliedMessage'],
+                              currentUserName: _auth.currentUser?.displayName,
+                              otherUserName: isCurrentUser
+                                  ? widget.userMap['name']
+                                  : null, // Pass the other user's name if it's not the current user
+                              fileUrl: message['fileUrl'],
+                            ),
+                          );
+                        },
+                      );
+                    } else if (snapshot.hasError) {
+                      return Center(
+                        child: Text('Error: ${snapshot.error}'),
+                      );
+                    } else {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+                  },
+                ),
               ),
             ),
-            Container(
-              padding: EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (repliedMessage != null) ...[
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                vertical: 8,
-                                horizontal: 16,
-                              ),
-                              decoration: BoxDecoration(
-                                border: Border(
-                                  left: BorderSide(
-                                    width: 4,
-                                    color: Colors.green,
-                                  ),
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      widget.userMap['name'],
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: Icon(Icons.clear),
-                                    onPressed: cancelReply,
-                                  ),
-                                ],
-                              ),
+          ),
+          Container(
+            padding: EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (repliedMessage != null) ...[
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              vertical: 8,
+                              horizontal: 16,
                             ),
-                            SizedBox(height: 4),
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                vertical: 8,
-                                horizontal: 16,
-                              ),
-                              decoration: BoxDecoration(
-                                border: Border(
-                                  left: BorderSide(
-                                    width: 4,
-                                    color: Colors.green,
-                                  ),
-                                ),
-                              ),
-                              child: Text(
-                                repliedMessage!,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.black,
+                            decoration: BoxDecoration(
+                              border: Border(
+                                left: BorderSide(
+                                  width: 4,
+                                  color: Colors.green,
                                 ),
                               ),
                             ),
-                            SizedBox(height: 8),
-                          ],
-                          Row(
-                            children: [
-                              // IconButton(
-                              //   onPressed: () {},
-                              //   // icon: SvgPicture.asset(
-                              //   //   'assets/emoji.svg',
-                              //   //   height: 24,
-                              //   //   width: 24,
-                              //   // ),
-                              // ),
-                              Expanded(
-                                child: TextField(
-                                  scrollPadding: EdgeInsets.all(5),
-                                  controller: _messageController,
-                                  decoration: InputDecoration(
-                                    hintText: 'Message...',
-                                    border: InputBorder.none,
-                                    contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 16,
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    widget.userMap['name'],
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey,
                                     ),
                                   ),
                                 ),
-                              ),
-
-                              IconButton(
-                                onPressed: _sendFileMessage,
-                                icon: Icon(Icons.attach_file),
-                              ),
-                              IconButton(
-                                onPressed: () {},
-                                icon: Icon(Icons.camera_alt_sharp),
-                              ),
-                            ],
+                                IconButton(
+                                  icon: Icon(Icons.clear),
+                                  onPressed: cancelReply,
+                                ),
+                              ],
+                            ),
                           ),
+                          SizedBox(height: 4),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              vertical: 8,
+                              horizontal: 16,
+                            ),
+                            decoration: BoxDecoration(
+                              border: Border(
+                                left: BorderSide(
+                                  width: 4,
+                                  color: Colors.green,
+                                ),
+                              ),
+                            ),
+                            child: Text(
+                              repliedMessage!,
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 8),
                         ],
-                      ),
+                        Row(
+                          children: [
+                            // IconButton(
+                            //   onPressed: () {},
+                            //   // icon: SvgPicture.asset(
+                            //   //   'assets/emoji.svg',
+                            //   //   height: 24,
+                            //   //   width: 24,
+                            //   // ),
+                            // ),
+                            Expanded(
+                              child: TextField(
+                                scrollPadding: EdgeInsets.all(5),
+                                controller: _messageController,
+                                decoration: InputDecoration(
+                                  hintText: 'Message...',
+                                  border: InputBorder.none,
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 16,
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                            IconButton(
+                              onPressed: _sendFileMessage,
+                              icon: Icon(Icons.attach_file),
+                            ),
+                            IconButton(
+                              onPressed: () {},
+                              icon: Icon(Icons.camera_alt_sharp),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
-                  SizedBox(width: 16),
-                  GestureDetector(
-                    onTap: () {
-                      onSendMessage(_messageController.text);
-                    },
-                    child: Container(
-                      padding: EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.blue,
-                      ),
-                      child: Icon(
-                        Icons.send,
-                        color: Colors.white,
-                      ),
+                ),
+                SizedBox(width: 16),
+                GestureDetector(
+                  onTap: () {
+                    onSendMessage(_messageController.text);
+                  },
+                  child: Container(
+                    padding: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.blue,
+                    ),
+                    child: Icon(
+                      Icons.send,
+                      color: Colors.white,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
