@@ -1,12 +1,16 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:firebase_storage/firebase_storage.dart' as fStorage;
 import 'package:image_picker/image_picker.dart';
 import 'package:velocity_x/velocity_x.dart';
+import 'package:http/http.dart'as http;
 
+import '../notification/notification_service.dart';
 import '../paystack/payment_page.dart';
 
 class AddJobs extends StatefulWidget {
@@ -26,6 +30,7 @@ class _AddJobsState extends State<AddJobs> {
   TextEditingController _descriptionController = TextEditingController();
   TextEditingController _requirementsController = TextEditingController();
   TextEditingController _companyNameController = TextEditingController();
+  NotificationsService notificationsService = NotificationsService();
 
   String jobtype = "";
 
@@ -69,11 +74,91 @@ class _AddJobsState extends State<AddJobs> {
     });
   }
 
+
+
+
   @override
   void initState() {
     super.initState();
+        FirebaseMessaging.instance.getInitialMessage();
+    FirebaseMessaging.onMessage.listen((event) {
+      // print('FCM Message Received');
+      LocalNotificationService.display(event);
+    });
+    notificationsService.initialiseNotifications();
     _selectedDate = DateTime.now();
   }
+
+
+void SendNotification(String title, String body, String token) async {
+    final data = {
+      'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+      'id': '1',
+      'status': 'done',
+      'title': title,
+      'body': body,
+    };
+
+    try {
+      http.Response response = await http.post(
+        Uri.parse('https://fcm.googleapis.com/fcm/send'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization':
+              'key=AAAA6msbZ3E:APA91bHFliFq8amgNOiLnltmuo2AxFHnxfLoFk6uVeSf1LEH7jti-i7l-jtiuFZN61koUeAC94Wa_ckPSE5Ao8xFfK_fiDxtV4sArdob_scjxoVcqXnBTulJ_SH6tE48u0RJGiZyEV_p'
+        },
+        body: jsonEncode(<String, dynamic>{
+          'notification': <String, dynamic>{
+            'title': '${body}',
+            'body': '',
+          },
+          'priority': 'high',
+          'data': data,
+          'to': token,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print("Notification sent successfully to $token");
+      } else {
+        print("Error sending notification to $token");
+      }
+    } catch (e) {
+      print("Error: $e");
+    }
+  }
+
+   Future<List<String>> getAllUserTokens() async {
+    List<String> userTokens = [];
+
+    try {
+      QuerySnapshot snapshot =
+          await FirebaseFirestore.instance.collection('users').get();
+      snapshot.docs.forEach((doc) {
+        Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
+        if (data != null) {
+          String? token = data['token'] as String?;
+          if (token != null && token.isNotEmpty) {
+            userTokens.add(token);
+          }
+        }
+      });
+    } catch (e) {
+      print("Error fetching user tokens: $e");
+    }
+
+    return userTokens;
+  }
+
+  void JobNotification(String title, String body) async {
+    List<String> allUserTokens =
+        await getAllUserTokens(); // Implement this method to fetch all user tokens
+
+    for (String token in allUserTokens) {
+      SendNotification(title, body, token);
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -509,6 +594,9 @@ class _AddJobsState extends State<AddJobs> {
                 _isAddingJob = false;
               });
 
+   // Notify users about the new job
+              JobNotification("New Job Added", "A new job has been added!");
+        
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text("Job Added Successfully"),

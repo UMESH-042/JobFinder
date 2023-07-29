@@ -86,54 +86,109 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
       String postedByEmail = widget.postedByEmail;
       String currentUserEmail = FirebaseAuth.instance.currentUser!.email!;
 
-      String? cvUrl = await _uploadCVFile();
+  //     String? cvUrl = await _uploadCVFile();
 
-      if (cvUrl == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to upload CV. Please try again.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
+  //     if (cvUrl == null) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(
+  //           content: Text('Failed to upload CV. Please try again.'),
+  //           backgroundColor: Colors.red,
+  //         ),
+  //       );
+  //       return;
+  //     }
 
-      final applicantsCollection =
-          FirebaseFirestore.instance.collection('applicants');
-      await applicantsCollection.add({
-        'job_document_id': widget.documentId,
-        'posted_by_email': postedByEmail,
-        'applicant_email': currentUserEmail,
-        'first_name': firstName,
-        'last_name': lastName,
-        'email': email,
-        'message': message,
-        'cv_url':
-            cvUrl, // Storing the CV URL along with other applicant details.
-        'timestamp': FieldValue.serverTimestamp(),
-      });
+  //     final applicantsCollection =
+  //         FirebaseFirestore.instance.collection('applicants');
+  //     await applicantsCollection.add({
+  //       'job_document_id': widget.documentId,
+  //       'posted_by_email': postedByEmail,
+  //       'applicant_email': currentUserEmail,
+  //       'first_name': firstName,
+  //       'last_name': lastName,
+  //       'email': email,
+  //       'message': message,
+  //       'cv_url':
+  //           cvUrl, // Storing the CV URL along with other applicant details.
+  //       'timestamp': FieldValue.serverTimestamp(),
+  //     });
 
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text('Successfully applied for the job.'),
+  //         backgroundColor: Colors.green,
+  //       ),
+  //     );
+
+  //     Navigator.pop(context, true);
+  //   } catch (e) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text('Failed to apply for the job. Please try again.'),
+  //         backgroundColor: Colors.red,
+  //       ),
+  //     );
+  //   } finally {
+  //     setState(() {
+  //       _isSubmitting = false;
+  //     });
+  //   }
+  // }
+  
+    String? cvUrl = await _uploadCVFile();
+
+    if (cvUrl == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Successfully applied for the job.'),
-          backgroundColor: Colors.green,
-        ),
-      );
-
-      Navigator.pop(context, true);
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to apply for the job. Please try again.'),
+          content: Text('Failed to upload CV. Please try again.'),
           backgroundColor: Colors.red,
         ),
       );
-    } finally {
-      setState(() {
-        _isSubmitting = false;
-      });
+      return;
     }
+
+    // Use batch writes to upload multiple fields in a single operation
+    WriteBatch batch = FirebaseFirestore.instance.batch();
+    final applicantsCollection = FirebaseFirestore.instance.collection('applicants');
+    DocumentReference applicantRef = applicantsCollection.doc();
+
+    batch.set(applicantRef, {
+      'job_document_id': widget.documentId,
+      'posted_by_email': postedByEmail,
+      'applicant_email': currentUserEmail,
+      'first_name': firstName,
+      'last_name': lastName,
+      'email': email,
+      'message': message,
+      'cv_url': cvUrl,
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+
+    // Commit the batch write
+    await batch.commit();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Successfully applied for the job.'),
+        backgroundColor: Colors.green,
+      ),
+    );
+
+    Navigator.pop(context, true);
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Failed to apply for the job. Please try again.'),
+        backgroundColor: Colors.red,
+      ),
+    );
+  } finally {
+    setState(() {
+      _isSubmitting = false;
+    });
   }
+}
+
 
   @override
   Widget build(BuildContext context) {

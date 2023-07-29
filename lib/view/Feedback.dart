@@ -1,7 +1,13 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:http/http.dart' as http;
+
+import '../notification/notification_service.dart';
 
 class FeedbackPage extends StatefulWidget {
   @override
@@ -19,12 +25,100 @@ class _FeedbackPageState extends State<FeedbackPage> {
   List<String> selectedFeedbackTypes = [];
 
   TextEditingController _feedbackController = TextEditingController();
+  NotificationsService notificationsService = NotificationsService();
+
+  @override
+  void initState() {
+    super.initState();
+
+    FirebaseMessaging.instance.getInitialMessage();
+    FirebaseMessaging.onMessage.listen((event) {
+      // print('FCM Message Received');
+      LocalNotificationService.display(event);
+    });
+    notificationsService.initialiseNotifications();
+  }
+
+  void SendNotification(String title, String body, String token) async {
+    final data = {
+      'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+      'id': '1',
+      'status': 'done',
+      'title': title,
+      'body': body,
+    };
+
+    try {
+      http.Response response = await http.post(
+        Uri.parse('https://fcm.googleapis.com/fcm/send'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization':
+              'key=AAAA6msbZ3E:APA91bHFliFq8amgNOiLnltmuo2AxFHnxfLoFk6uVeSf1LEH7jti-i7l-jtiuFZN61koUeAC94Wa_ckPSE5Ao8xFfK_fiDxtV4sArdob_scjxoVcqXnBTulJ_SH6tE48u0RJGiZyEV_p'
+        },
+        body: jsonEncode(<String, dynamic>{
+          'notification': <String, dynamic>{
+            'title': '${title} : ${body}',
+            'body': '',
+          },
+          'priority': 'high',
+          'data': data,
+          'to': token,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print("Notification sent successfully to $token");
+      } else {
+        print("Error sending notification to $token");
+      }
+    } catch (e) {
+      print("Error: $e");
+    }
+  }
+
+  Future<List<String>> getAdminUserTokens() async {
+    List<String> adminTokens = [];
+    try {
+      final QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('userType', isEqualTo: 'admin')
+          .get();
+
+      print('Number of admin documents found: ${querySnapshot.docs.length}');
+
+      if (querySnapshot.docs.isNotEmpty) {
+        // Loop through the documents to get the tokens
+        for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+          String? token = doc.get('token');
+          if (token != null) {
+            adminTokens.add(token);
+            print('Admin Token: $token');
+          }
+        }
+      }
+    } catch (e) {
+      print('Error fetching admin user tokens: $e');
+    }
+
+    return adminTokens;
+  }
+
+  void FeedbackNotification(String title, String body) async {
+    List<String> allUserTokens =
+        await getAdminUserTokens(); // Implement this method to fetch all user tokens
+
+    for (String token in allUserTokens) {
+      SendNotification(title + " (Feedback)", body, token);
+    }
+  }
 
   Future<void> _submitFeedback() async {
     String feedbackText = _feedbackController.text;
 
     // Get the email of the current user
     String? currentUserEmail = FirebaseAuth.instance.currentUser?.email;
+    final FirebaseAuth _auth = FirebaseAuth.instance;
 
     if (currentUserEmail != null) {
       // Store the feedback data in Firestore
@@ -32,9 +126,11 @@ class _FeedbackPageState extends State<FeedbackPage> {
         'email': currentUserEmail,
         'feedbackText': feedbackText,
         'selectedFeedbackTypes': selectedFeedbackTypes,
-        'timestamp': FieldValue.serverTimestamp(), // Add a timestamp for sorting purposes
+        'timestamp': FieldValue
+            .serverTimestamp(), // Add a timestamp for sorting purposes
       });
 
+      FeedbackNotification("${_auth.currentUser?.displayName}", feedbackText);
       // For demonstration purposes, we are just printing the feedback and selected types here.
       print('Feedback submitted: $feedbackText');
       print('Selected Types: $selectedFeedbackTypes');
@@ -47,7 +143,8 @@ class _FeedbackPageState extends State<FeedbackPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Thank you for your feedback!'),
-          duration: Duration(seconds: 2), // You can adjust the duration as needed
+          duration:
+              Duration(seconds: 2), // You can adjust the duration as needed
         ),
       );
 
@@ -113,20 +210,28 @@ class _FeedbackPageState extends State<FeedbackPage> {
               'Please select the type of feedback:',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: screenHeight * 0.02), // Adjust spacing based on screen height
+            SizedBox(
+                height: screenHeight *
+                    0.02), // Adjust spacing based on screen height
             Wrap(
-              spacing: screenWidth * 0.04, // Adjust spacing based on screen width
-              runSpacing: screenHeight * 0.02, // Adjust spacing based on screen height
+              spacing:
+                  screenWidth * 0.04, // Adjust spacing based on screen width
+              runSpacing:
+                  screenHeight * 0.02, // Adjust spacing based on screen height
               children: feedbackTypes.map((type) {
                 return feedbackTypeChoiceChip(type);
               }).toList(),
             ),
-            SizedBox(height: screenHeight * 0.03), // Adjust spacing based on screen height
+            SizedBox(
+                height: screenHeight *
+                    0.03), // Adjust spacing based on screen height
             Text(
               'Please provide your detailed feedback:',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: screenHeight * 0.02), // Adjust spacing based on screen height
+            SizedBox(
+                height: screenHeight *
+                    0.02), // Adjust spacing based on screen height
             Expanded(
               child: TextFormField(
                 controller: _feedbackController,
@@ -137,7 +242,9 @@ class _FeedbackPageState extends State<FeedbackPage> {
                 ),
               ),
             ),
-            SizedBox(height: screenHeight * 0.02), // Adjust spacing based on screen height
+            SizedBox(
+                height: screenHeight *
+                    0.02), // Adjust spacing based on screen height
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 primary: Color.fromARGB(

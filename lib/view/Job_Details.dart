@@ -1,8 +1,14 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:vuna__gigs/view/ApplicationScreen.dart';
+import 'package:http/http.dart' as http;
+
+import '../notification/notification_service.dart';
 
 class JobDetailsPage extends StatefulWidget {
   final String documentId; // Add document ID parameter
@@ -38,35 +44,56 @@ class JobDetailsPage extends StatefulWidget {
 class _JobDetailsPageState extends State<JobDetailsPage> {
   bool _isLoading = false;
   int _currentApplicants = 0;
+  NotificationsService notificationsService = NotificationsService();
 
   @override
   void initState() {
     super.initState();
     _currentApplicants = widget.noOfApplicants;
-     WidgetsBinding.instance!.addPostFrameCallback((_) {
+    FirebaseMessaging.instance.getInitialMessage();
+    FirebaseMessaging.onMessage.listen((event) {
+      // print('FCM Message Received');
+      LocalNotificationService.display(event);
+    });
+    notificationsService.initialiseNotifications();
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
       _showInstructionsDialog();
     });
   }
-  //   void _showInstructionsDialog() {
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         title: Text("Instructions"),
-  //         content: Text("Welcome to the job details page. Please read the job description and requirements carefully. If you are interested in applying for this job, click the 'Apply for Job' button."),
-  //         actions: [
-  //           TextButton(
-  //             onPressed: () {
-  //               Navigator.of(context).pop();
-  //             },
-  //             child: Text("Okay"),
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
-  
+
+  Future<String?> getUserToken(String userEmail) async {
+    try {
+      DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('email', isEqualTo: userEmail)
+          .get()
+          .then((querySnapshot) => querySnapshot.docs.first);
+
+      Map<String, dynamic>? userData =
+          userSnapshot.data() as Map<String, dynamic>?;
+
+      if (userData != null) {
+        String? userToken = userData['token'] as String?;
+        return userToken;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching user token: $e');
+      return null;
+    }
+  }
+
+  void ApplicantNotification(String title, String body) async {
+    String? token = await getUserToken(widget.postedby);
+    if (token != null) {
+      SendNotification(title, body, token);
+      print('Notification successful!');
+    } else {
+      print('Notification Failed!');
+    }
+  }
+
   void _showInstructionsDialog() {
     showDialog(
       context: context,
@@ -77,7 +104,8 @@ class _JobDetailsPageState extends State<JobDetailsPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("1. After the job is over, the admin will pay you directly, and you'll need to get in touch with him using chats to do so."),
+              Text(
+                  "1. After the job is over, the admin will pay you directly, and you'll need to get in touch with him using chats to do so."),
               SizedBox(height: 16),
               Text("2. Contact Admin for any Payment related issue."),
             ],
@@ -93,6 +121,44 @@ class _JobDetailsPageState extends State<JobDetailsPage> {
         );
       },
     );
+  }
+
+  void SendNotification(String title, String body, String token) async {
+    final data = {
+      'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+      'id': '1',
+      'status': 'done',
+      'title': title,
+      'body': body,
+    };
+
+    try {
+      http.Response response = await http.post(
+        Uri.parse('https://fcm.googleapis.com/fcm/send'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization':
+              'key=AAAA6msbZ3E:APA91bHFliFq8amgNOiLnltmuo2AxFHnxfLoFk6uVeSf1LEH7jti-i7l-jtiuFZN61koUeAC94Wa_ckPSE5Ao8xFfK_fiDxtV4sArdob_scjxoVcqXnBTulJ_SH6tE48u0RJGiZyEV_p'
+        },
+        body: jsonEncode(<String, dynamic>{
+          'notification': <String, dynamic>{
+            'title': '${title} : ${body}',
+            'body': '',
+          },
+          'priority': 'high',
+          'data': data,
+          'to': token,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print("Notification sent successfully to $token");
+      } else {
+        print("Error sending notification to $token");
+      }
+    } catch (e) {
+      print("Error: $e");
+    }
   }
 
   String ChatRoomId(String user1, String user2) {
@@ -144,7 +210,10 @@ class _JobDetailsPageState extends State<JobDetailsPage> {
             'I am interested in your Company ${widget.CompanyName} to work as ${widget.category} and I am willing to work ${widget.jobtype}',
         'time': FieldValue.serverTimestamp(),
       };
-
+      ApplicantNotification(
+        "${_auth.currentUser?.displayName}",
+        'I am interested in your Company ${widget.CompanyName} to work as ${widget.category} and I am willing to work ${widget.jobtype}',
+      );
       await chatRoomRef.collection('chats').add(messageData);
 
       print('Message sent successfully!');
@@ -217,6 +286,8 @@ class _JobDetailsPageState extends State<JobDetailsPage> {
 
         // Check the result returned from the ApplicationFormScreen
         if (applicationResult == true) {
+          ApplicantNotification(
+              "New Applicant", "Applicant Applied for the job!!");
           // Application was successfully submitted
           sendMessageToPostedByUser(currentUserEmail).then((_) {
             // ScaffoldMessenger.of(context).showSnackBar(
@@ -228,6 +299,7 @@ class _JobDetailsPageState extends State<JobDetailsPage> {
             setState(() {
               _currentApplicants++; // Increase the value by one
             });
+
             Navigator.pop(context);
           }).catchError((error) {
             ScaffoldMessenger.of(context).showSnackBar(

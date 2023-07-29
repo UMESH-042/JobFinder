@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -212,9 +213,27 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                         ),
                         child: ListTile(
                           onTap: () => openChatRoom(user),
-                          leading: CircleAvatar(
-                            backgroundImage: NetworkImage(imageUrl),
-                          ),
+                          // leading: CircleAvatar(
+                          //   backgroundImage: NetworkImage(imageUrl),
+                          // ),
+                                       leading: imageUrl != null
+                ? CachedNetworkImage(
+                    imageUrl: imageUrl,
+                    placeholder: (context, url) => Container(
+                      width: 60,
+                      height: 60,
+                      color: Colors.white,
+                    ),
+                    errorWidget: (context, url, error) => Icon(Icons.error),
+                    imageBuilder: (context, imageProvider) => CircleAvatar(
+                      backgroundImage: imageProvider,
+                      radius: 30.0,
+                    ),
+                  )
+                : CircleAvatar(
+                    backgroundColor: Colors.grey[400],
+                    child: Icon(Icons.person, color: Colors.white),
+                  ),
                           title: userType=='admin'? Text(userName+'(Admin)'):Text(userName),
                           subtitle: Text(userEmail),
                           // Other user details can be displayed here

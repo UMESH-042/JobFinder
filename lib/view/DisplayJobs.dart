@@ -1,5 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import 'Job_Details.dart';
 import 'package:intl/intl.dart';
@@ -409,7 +411,6 @@ class _JobListPageState extends State<JobListPage> {
                   ),
                 ],
               ),
-              
               SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -422,150 +423,170 @@ class _JobListPageState extends State<JobListPage> {
                     ),
                   ),
                   Text(
-                '$totalJobsCount Job opportunity', // Display the total jobs count
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey[600],
-                ),
-              ),
+                    '$totalJobsCount Job opportunity', // Display the total jobs count
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[600],
+                    ),
+                  ),
                 ],
               ),
               SizedBox(height: 16),
-              Container(
-                height: 200,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: popularJobs.length,
-                  separatorBuilder: (context, index) => SizedBox(width: 16),
-                  itemBuilder: (context, index) {
-                    final jobSnapshot = popularJobs[index];
-                    final jobData = jobSnapshot.data() as Map<String, dynamic>?;
+              LayoutBuilder(builder: (context, constraints) {
+                final cardWidth = constraints.maxWidth * 0.8;
+                return Container(
+                  height: 200,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: popularJobs.length,
+                    separatorBuilder: (context, index) => SizedBox(width: 16),
+                    itemBuilder: (context, index) {
+                      final jobSnapshot = popularJobs[index];
+                      final jobData =
+                          jobSnapshot.data() as Map<String, dynamic>?;
 
-                    if (jobData == null) {
-                      // Handle null data
-                      return SizedBox.shrink();
-                    }
+                      if (jobData == null) {
+                        // Handle null data
+                        return SizedBox.shrink();
+                      }
 
-                    final location = jobData['location'] ?? 'Unknown';
-                    final salary = jobData['salary'] ?? 'Unknown';
-                    final category = jobData['category'] ?? 'Unknown';
-                    final image = jobData['image'];
-                    final jobtype = jobData['jobtype'];
-                    final description = jobData['description'];
-                    final requirements = jobData['requirements'];
-                    final postedby = jobData['postedby'];
-                    final noOfApplicants =
-                        jobData['NoOfApplicants'] ?? 0; // Added
-                    final CompanyName = jobData['companyDetails'];
+                      final location = jobData['location'] ?? 'Unknown';
+                      final salary = jobData['salary'] ?? 'Unknown';
+                      final category = jobData['category'] ?? 'Unknown';
+                      final image = jobData['image'];
+                      final jobtype = jobData['jobtype'];
+                      final description = jobData['description'];
+                      final requirements = jobData['requirements'];
+                      final postedby = jobData['postedby'];
+                      final noOfApplicants =
+                          jobData['NoOfApplicants'] ?? 0; // Added
+                      final CompanyName = jobData['companyDetails'];
 
-                    return GestureDetector(
-                      onTap: () {
-                        // Navigate to job details page
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => JobDetailsPage(
-                              documentId:
-                                  jobSnapshot.id, // Pass the document ID
-                              location: location,
-                              salary: salary,
-                              category: category,
-                              image: image,
-                              jobtype: jobtype,
-                              description: description,
-                              requirements: requirements,
-                              postedby: postedby,
-                              noOfApplicants: noOfApplicants,
-                              CompanyName: CompanyName,
+                      return GestureDetector(
+                        onTap: () {
+                          // Navigate to job details page
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => JobDetailsPage(
+                                documentId:
+                                    jobSnapshot.id, // Pass the document ID
+                                location: location,
+                                salary: salary,
+                                category: category,
+                                image: image,
+                                jobtype: jobtype,
+                                description: description,
+                                requirements: requirements,
+                                postedby: postedby,
+                                noOfApplicants: noOfApplicants,
+                                CompanyName: CompanyName,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          // width: 250,
+                          width: cardWidth, // Use the calculated card width
+                          child: Card(
+                            elevation: 2,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  // child: ClipRRect(
+                                  //   borderRadius: BorderRadius.vertical(
+                                  //     top: Radius.circular(8),
+                                  //   ),
+                                  //   child: Container(
+                                  //     margin: EdgeInsets.all(10),
+                                  //     child: Image.network(
+                                  //       image ?? '',
+                                  //       fit: BoxFit.cover,
+                                  //     ),
+                                  //   ),
+                                  // ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.vertical(
+                                      top: Radius.circular(8),
+                                    ),
+                                    child: CachedNetworkImage(
+                                      imageUrl: image ?? '',
+                                      fit: BoxFit.cover,
+                                      placeholder: (context, url) => Container(
+                                        color: Colors.grey[200],
+                                      ),
+                                      errorWidget: (context, url, error) =>
+                                          Icon(Icons.error),
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.all(16),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        category,
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      SizedBox(height: 8),
+                                      Text(
+                                        jobtype,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                      SizedBox(height: 8),
+                                      Text(
+                                        'Location: $location',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                      SizedBox(height: 16),
+                                      Row(
+                                        // Wrap salary and applicants in a row
+                                        children: [
+                                          Text(
+                                            'Salary: \$${salary}/m',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.grey[600],
+                                            ),
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            'Applicants: $noOfApplicants',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.grey[600],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        );
-                      },
-                      child: Container(
-                        width: 250,
-                        child: Card(
-                          elevation: 2,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.vertical(
-                                    top: Radius.circular(8),
-                                  ),
-                                  child: Container(
-                                    margin: EdgeInsets.all(10),
-                                    child: Image.network(
-                                      image ?? '',
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: EdgeInsets.all(16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      category,
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    SizedBox(height: 8),
-                                    Text(
-                                      jobtype,
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.grey[600],
-                                      ),
-                                    ),
-                                    SizedBox(height: 8),
-                                    Text(
-                                      'Location: $location',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.grey[600],
-                                      ),
-                                    ),
-                                    SizedBox(height: 16),
-                                    Row(
-                                      // Wrap salary and applicants in a row
-                                      children: [
-                                        Text(
-                                          'Salary: \$${salary}/m',
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.grey[600],
-                                          ),
-                                        ),
-                                        SizedBox(width: 8),
-                                        Text(
-                                          'Applicants: $noOfApplicants',
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.grey[600],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
                         ),
-                      ),
-                    );
-                  },
-                ),
-              ),
+                      );
+                    },
+                  ),
+                );
+              }),
               SizedBox(height: 32),
               Text(
                 'Recent Posts',
@@ -630,17 +651,38 @@ class _JobListPageState extends State<JobListPage> {
                       ),
                       child: ListTile(
                         contentPadding: EdgeInsets.all(16),
+                        // leading: image != null
+                        //     ? ClipRRect(
+                        //         borderRadius: BorderRadius.circular(8),
+                        //         child: Image.network(
+                        //           image,
+                        //           fit: BoxFit.cover,
+                        //           width: 60,
+                        //           height: 60,
+                        //         ),
+                        //       )
+                        //     : Icon(Icons.image, size: 60),
                         leading: image != null
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image.network(
-                                  image,
-                                  fit: BoxFit.cover,
+                            ? CachedNetworkImage(
+                                imageUrl: image,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => Container(
                                   width: 60,
                                   height: 60,
+                                  color: Colors.white,
+                                ),
+                                errorWidget: (context, url, error) =>
+                                    Icon(Icons.error),
+                                imageBuilder: (context, imageProvider) =>
+                                    CircleAvatar(
+                                  backgroundImage: imageProvider,
+                                  radius: 30.0,
                                 ),
                               )
-                            : Icon(Icons.image, size: 60),
+                            : CircleAvatar(
+                                backgroundColor: Colors.grey[400],
+                                child: Icon(Icons.person, color: Colors.white),
+                              ),
                         title: Text(
                           category,
                           style: TextStyle(
