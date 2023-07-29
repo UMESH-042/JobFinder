@@ -58,7 +58,7 @@ dependencies:
   permission_handler: ^10.4.2
   google_sign_in: ^6.1.4
   font_awesome_flutter: ^10.5.0
-  http: ^0.13.0
+  http: ^0.13.6
   flutter_paystack: ^1.0.7
   cached_network_image: ^3.2.3
   timeago: ^3.3.0
@@ -68,20 +68,25 @@ dependencies:
   multi_select_flutter: ^4.1.3
 
 
-
-
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: "^0.13.1"
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/vunaGigs_logo.png"
+  min_sdk_android: 21
+
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^2.0.0
-
+  
+flutter_lints: ^2.0.0
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -97,8 +102,8 @@ flutter:
   assets:
     - assets/facebook_logo.png
     - assets/google_logo.png
-    - assets/landingimage.jpg
-    - assets/vunaGigs_logo.jpeg
+    - assets/landingimage.png
+    - assets/vunaGigs_logo.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

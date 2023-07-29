@@ -400,6 +400,7 @@ class _LoginScreenState extends State<LoginScreen> {
   //   }
   //   _isLoggingIn = false;
   // }
+  
   void _handleGoogleSignIn() async {
   if (_isLoggingIn) return;
   setState(() {

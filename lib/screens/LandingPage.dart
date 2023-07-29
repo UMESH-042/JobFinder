@@ -16,7 +16,7 @@ class LandingPage extends StatelessWidget {
           children: [
             // Animated picture or image
              Image.asset(
-                        'assets/landingimage.jpg', // Replace with the path to the Google logo image
+                        'assets/landingimage.png', // Replace with the path to the Google logo image
                         height: 200,
                       ),
             // FlutterLogo(
@@ -109,7 +109,7 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       body: Center(
         // child: FlutterLogo(size: 150),
-        child: Image.asset('assets/vunaGigs_logo.jpeg', width: 200, height: 200),
+        child: Image.asset('assets/vunaGigs_logo.png', width: 200, height: 200),
       ),
     );
   }
