@@ -565,7 +565,7 @@ void SendNotification(String title, String body, String token) async {
           final paymentResult = await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => PaymentPage(),
+              builder: (context) => PaymentPage(salary: _salaryController.text,),
             ),
           );
           if (paymentResult == true) {

@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_paystack/flutter_paystack.dart';
 
 class PaymentPage extends StatefulWidget {
-  const PaymentPage({super.key});
+  final String salary;
+  const PaymentPage({super.key, required this.salary});
 
   @override
   State<PaymentPage> createState() => _PaymentPageState();
@@ -25,6 +26,7 @@ class _PaymentPageState extends State<PaymentPage> {
       _showPaymentInstructionsDialog();
       _isInitComplete = true;
     });
+     amountController.text = widget.salary; 
   }
 
   int currentInstruction = 1;
@@ -225,15 +227,27 @@ class _PaymentPageState extends State<PaymentPage> {
                   key: _formKey,
                   child: Column(
                     children: [
+                      // TextFormField(
+                      //   controller: amountController,
+                      //   autovalidateMode: AutovalidateMode.onUserInteraction,
+                      //   validator: (value) {
+                      //     if (value == null || value.isEmpty) {
+                      //       return 'Please enter the amount';
+                      //     }
+                      //     return null;
+                      //   },
+                      //   decoration: InputDecoration(
+                      //     prefixIcon: Icon(Icons.attach_money),
+                      //     hintText: 'Enter amount',
+                      //     labelText: 'Amount',
+                      //     border: OutlineInputBorder(
+                      //       borderRadius: BorderRadius.circular(10.0),
+                      //     ),
+                      //   ),
+                      // ),
                       TextFormField(
                         controller: amountController,
-                        autovalidateMode: AutovalidateMode.onUserInteraction,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter the amount';
-                          }
-                          return null;
-                        },
+                        enabled: false, // Make the field read-only
                         decoration: InputDecoration(
                           prefixIcon: Icon(Icons.attach_money),
                           hintText: 'Enter amount',

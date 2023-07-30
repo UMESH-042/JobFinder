@@ -264,9 +264,23 @@ class _JobDetailsPageState extends State<JobDetailsPage> {
   }
 
   Widget button(BuildContext context) {
+    String currentUserEmail = FirebaseAuth.instance.currentUser!.email!;
+
+    // Check if the current user's email is equal to postedby email
+    bool isCurrentUserPostedBy = currentUserEmail == widget.postedby;
     return InkWell(
       onTap: () async {
         String currentUserEmail = FirebaseAuth.instance.currentUser!.email!;
+        if (isCurrentUserPostedBy) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('You cannot apply to your own job.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+
         setState(() {
           _isLoading = true;
         });
@@ -328,7 +342,9 @@ class _JobDetailsPageState extends State<JobDetailsPage> {
         width: MediaQuery.of(context).size.width,
         height: 55,
         decoration: BoxDecoration(
-          color: Color.fromARGB(255, 76, 175, 142),
+          color: isCurrentUserPostedBy
+              ? Colors.grey
+              : Color.fromARGB(255, 76, 175, 142),
           borderRadius: BorderRadius.circular(15),
         ),
         child: Center(
@@ -338,7 +354,7 @@ class _JobDetailsPageState extends State<JobDetailsPage> {
                   size: 25.0,
                 )
               : Text(
-                  "Apply for Job",
+                  isCurrentUserPostedBy ? "Own Job" : "Apply for Job",
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,

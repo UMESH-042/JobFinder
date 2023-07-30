@@ -189,6 +189,26 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
   }
 }
 
+void initState() {
+    super.initState();
+
+    // Get the current user's data from Firebase Authentication
+    User? currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      String displayName = currentUser.displayName ?? '';
+      List<String> nameParts = displayName.split(' ');
+      _firstNameController.text = nameParts.isNotEmpty ? nameParts.first : '';
+      _lastNameController.text = nameParts.length > 1 ? nameParts.last : '';
+      _emailController.text = currentUser.email ?? '';
+    }
+  }
+
+
+
+
+
+
+
 
   @override
   Widget build(BuildContext context) {
