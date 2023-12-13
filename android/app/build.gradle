@@ -23,6 +23,7 @@ if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
 
+
 android {
     namespace "com.example.vuna__gigs"
     compileSdkVersion 33

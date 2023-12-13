@@ -62,7 +62,6 @@ dependencies:
   flutter_paystack: ^1.0.7
   cached_network_image: ^3.2.3
   timeago: ^3.3.0
-  zego_uikit_prebuilt_call: ^3.1.1
   showcaseview: ^2.0.3
   shared_preferences: ^2.2.0
   multi_select_flutter: ^4.1.3

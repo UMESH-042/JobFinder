@@ -25,17 +25,17 @@ Future main() async {
 
 Future<void> _handleBackgroundMessage(RemoteMessage message) async {
   print('Handling a background message: ${message.messageId}');
-  _navigateToCallPage(message.data['callID']);
+  // _navigateToCallPage(message.data['callID']);
 }
 
-void _navigateToCallPage(String callID) {
-  print('Navigating to the call page with callID: $callID');
-  // Use the Navigator to push the CallPage with the received callID.
-  // Assuming you have access to the current BuildContext, use it to push the CallPage.
-  Navigator.of(context as BuildContext).push(MaterialPageRoute(builder: (context) {
-    return CallPage(callID: callID);
-  }));
-}
+// void _navigateToCallPage(String callID) {
+//   print('Navigating to the call page with callID: $callID');
+//   // Use the Navigator to push the CallPage with the received callID.
+//   // Assuming you have access to the current BuildContext, use it to push the CallPage.
+//   Navigator.of(context as BuildContext).push(MaterialPageRoute(builder: (context) {
+//     return CallPage(callID: callID);
+//   }));
+// }
 
 class MyApp extends StatelessWidget {
   

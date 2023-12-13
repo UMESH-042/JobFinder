@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:vuna__gigs/view/Home_Screen.dart';
 
 import '../screens/chatRoom.dart';
-
+// Users List is present in this screen
 class ChatScreen extends StatefulWidget {
   final String currentUserEmail;
   const ChatScreen({Key? key, required this.currentUserEmail})
